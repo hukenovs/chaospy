@@ -2,7 +2,7 @@
 
 Python scripts for some 3rd order chaotic systems (Lorenz attractor, Nose-Hoover oscillator, Rossler attractor, Riktake model)
 
-License: GNU GPL 3.0.
+**License: GNU GPL 3.0.**
 
 ### Info:
 
@@ -18,49 +18,46 @@ License: GNU GPL 3.0.
 ### List of chaotic 3D systems:
 
 #### Lorenz
+```
+dx/dt = sigma * (y - x)
 
-$$ dx / dt = \sigma * (y - x)$$
+dy/dt = rho * (x - z) - y
 
-$$ dy / dt = \rho * (x - z) - y$$
-
-$$ dz / dt = x * y - \beta * z$$
-
-where $$\sigma$$= 10, $$\rho$$= 28 and $$\beta$$= 8/3.
+dz/dt = x * y - beta * z
+```
+where sigma= 10, rho= 28 and beta= 8/3.
 
 ![](https://github.com/capitanov/chaospy/blob/master/img/Lorenz.png)
-
 #### Rossler 3D system
+```
+dx/dt = -(y + z)
 
-$$ dx / dt =- (y + z)$$
+dy/dt = x + a * y
 
-$$ dy / dt = x + a * y$$
-
-$$ dz / dt = b + z * (x - c)$$
-
+dz/dt = b + z * (x - c)
+```
 where a = 0.2, b = 0.2 and c = 5.7.
 
 ![](https://github.com/capitanov/chaospy/blob/master/img/Rossler_3D.png)
-
 #### Rikitake
+```
+dx/dt = -mu * x + z * y
 
-$$ dx / dt =-\mu * x + z * y$$
+dy/dt = -mu * y + x * (z - a)
 
-$$ dy / dt =-\mu * y + x * (z - a)$$
-
-$$ dz / dt = 1 - x * y$$
-
-where $$\mu$$= 1, a = 5.
+dz/dt = 1 - x * y
+```
+where mu= 1, a = 5.
 
 ![](https://github.com/capitanov/chaospy/blob/master/img/Rikitake_3D.png)
-
 #### Nose–Hoover
+```
+dx/dt = y
 
-$$ dx / dt =y$$
+dy/dt = y * z - x
 
-$$ dy / dt = y * z - x$$
-
-$$ dz / dt = 1 - y^2$$
-
+dz/dt = 1 - y^2
+```
 Nose-Hoover doesn't have default parameters.
 ![](https://github.com/capitanov/chaospy/blob/master/img/Nose_Hoover_3D.png)
 
