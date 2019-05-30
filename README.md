@@ -27,7 +27,7 @@ $$ dz / dt = x * y - \beta * z$$
 
 where $$\sigma$$= 10, $$\rho$$= 28 and $$\beta$$= 8/3.
 
-![](https://github.com/capitanov/chaospy/img/Lorenz.png)
+![](https://github.com/capitanov/chaospy/blob/master/img/Lorenz.png)
 
 #### Rossler 3D system
 
@@ -39,7 +39,7 @@ $$ dz / dt = b + z * (x - c)$$
 
 where a = 0.2, b = 0.2 and c = 5.7.
 
-![](https://github.com/capitanov/chaospy/img/Rossler_3D.png)
+![](https://github.com/capitanov/chaospy/blob/master/img/Rossler_3D.png)
 
 #### Rikitake
 
@@ -51,7 +51,7 @@ $$ dz / dt = 1 - x * y$$
 
 where $$\mu$$= 1, a = 5.
 
-![](https://github.com/capitanov/chaospy/img/Rikitake_3D.png)
+![](https://github.com/capitanov/chaospy/blob/master/img/Rikitake_3D.png)
 
 #### Nose–Hoover
 
@@ -62,7 +62,7 @@ $$ dy / dt = y * z - x$$
 $$ dz / dt = 1 - y^2$$
 
 Nose-Hoover doesn't have default parameters.
-![](https://github.com/capitanov/chaospy/img/Nose_Hoover_3D.png)
+![](https://github.com/capitanov/chaospy/blob/master/img/Nose_Hoover_3D.png)
 
 See more: [Wikipedia about attractors](https://en.wikipedia.org/wiki/Attractor "Attractors")
 
