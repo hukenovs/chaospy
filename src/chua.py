@@ -83,8 +83,13 @@ def chua(x=0, y=0, z=1, **kwargs):
 
     ht = mu1*x + 0.5*(mu0 - mu1)*(np.abs(x + 1) - np.abs(x - 1))
     # Next step coordinates:
+    # Eq. 1:
     x_out = alpha*(y - x - ht)
     y_out = x - y + z
     z_out = -beta*y
+    # Eq. 2:
+    # x_out = 0.3*y + x - x**3
+    # y_out = x + z
+    # z_out = y
 
     return x_out, y_out, z_out

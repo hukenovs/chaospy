@@ -14,6 +14,10 @@ Description   : This is the main module which collects attractors
                 together. You can choose: Lorenz, Rossler, Rikitake,
                 Nose-Hoover, Chua, Lottki, Duffing, Wang etc.
 
+    Attention!
+    You should set correct initial values of coordinates [Xo, Yo, Zo]
+    because of some attractors has an overflow effect.
+
     ----------
     Lorenz:
     ----------
@@ -218,219 +222,28 @@ OR CORRECTION.
 """
 
 import numpy as np
+from scipy.stats import kurtosis, skew, gaussian_kde
 from scipy.fftpack import fft
+from scipy.signal import convolve
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d  # noqa # pylint: disable=unused-import
 
+from src.chua import chua
+from src.wang import wang
+from src.lorenz import lorenz
+from src.rossler import rossler
+from src.duffing import duffing
+from src.rikitake import rikitake
+from src.nose_hoover import nose_hoover
+from src.lotka_volterra import lotka_volterra
 
 # #####################################################################
-# Function declaration
+# Input parameters
 # #####################################################################
 
-
-def lorenz(x=0, y=0, z=0, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
-        beta, rho and sigma - are Lorenz system parameters
-    """
-    # Default parameters:
-    sigma = kwargs.get('sigma', 10)
-    beta = kwargs.get('beta', 8/3)
-    rho = kwargs.get('rho', 28)
-
-    # Next step coordinates:
-    x_out = sigma*(y - x)
-    y_out = rho*x - y - x*z
-    z_out = x*y - beta*z
-    return x_out, y_out, z_out
-
-
-def rossler(x=0, y=0, z=0, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Rossler system
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
-        a, b and c - are Rossler system parameters
-    """
-    # Default parameters:
-    aa = kwargs.get('a', 0.2)
-    bb = kwargs.get('b', 0.2)
-    cc = kwargs.get('c', 5.7)
-
-    # Next step coordinates:
-    x_out = -(y + z)
-    y_out = x + aa*y
-    z_out = bb + z*(x - cc)
-    return x_out, y_out, z_out
-
-
-def rikitake(x=0, y=0, z=0, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Rikitake system
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
-        mu, a - are Rikitake system parameters
-    """
-    # Default parameters:
-    aa = kwargs.get('a', 5)
-    mu = kwargs.get('mu', 2)
-
-    # Next step coordinates:
-    x_out = -mu*x + z*y
-    y_out = -mu*y + x*(z - aa)
-    z_out = 1 - x*y
-
-    return x_out, y_out, z_out
-
-
-def nose_hoover(x=0, y=0, z=0):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Nose-Hoover
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    """
-    # Next step coordinates:
-    x_out = y
-    y_out = y*z - x
-    z_out = 1 - y**2
-    return x_out, y_out, z_out
-
-
-def wang(x=0, y=0, z=0):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Wang Attractor
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    """
-    # Next step coordinates:
-    x_out = x - y*z
-    y_out = x - y + x*z
-    z_out = -3*z + x*y
-    return x_out, y_out, z_out
-
-
-def duffing(x=0, y=0, z=0, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for Duffing map.
-    It is 2nd order attractor (Z coordinate = 1)
-
-    Duffing map:
-    Eq. 1:
-        dx/dt = y
-        dy/dt = -a*y - x**3 + b * cos(z)
-        dz/dt = 1
-    where a = 0.1 and b = 11 (default parameters)
-
-    Eq. 2:
-        dx/dt = y
-        dy/dt = a*y - y**3 - b*x
-        dz/dt = 1
-    where a = 2.75 and b = 0.2 (default parameters)
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
-        a and b - are Duffing system parameters
-    """
-    # Default parameters:
-    # a = kwargs.get('a', 2.75)
-    # b = kwargs.get('b', 0.2)
-    a = kwargs.get('a', 0.1)
-    b = kwargs.get('b', 11)
-
-    # Next step coordinates:
-    x_out = y
-    y_out = -a*y - x**3 + b*np.cos(z)
-    # y_out = a*y - y**3 - b*x
-    z_out = 1
-    return x_out, y_out, z_out
-
-
-def lotka_volterra(x=0, y=0, z=0):
-    """
-    Calculate the next coordinate X, Y, Z for Lotka–Volterra
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    """
-    # Next step coordinates:
-    x_out = x*(1 - x - 9*y)
-    y_out = -y*(1 - 6*x - y + 9*z)
-    z_out = z*(1 - 3*x - z)
-    return x_out, y_out, z_out
-
-
-def chua(x=0, y=0, z=1, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for Chua system.
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
-        alpha, beta, mu0, mu1 - are Chua system parameters
-    """
-    # Default parameters:
-    alpha = kwargs.get('alpha', 15.6)
-    beta = kwargs.get('beta', 28)
-    mu0 = kwargs.get('mu0', -1.143)
-    mu1 = kwargs.get('mu1', -0.714)
-
-    ht = mu1*x + 0.5*(mu0 - mu1)*(np.abs(x + 1) - np.abs(x - 1))
-    # Next step coordinates:
-    x_out = alpha*(y - x - ht)
-    y_out = x - y + z
-    z_out = -beta*y
-    return x_out, y_out, z_out
-
-
-def chua2(x=0, y=0, z=1):
-    """
-    Calculate the next coordinate X, Y, Z for Chua system.
-
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    """
-    # Next step coordinates:
-    x_out = 0.3*y + x - x**3
-    y_out = x + z
-    z_out = y
-    return x_out, y_out, z_out
-
-
-# #####################################################################
-# Calculate attractor
-# #####################################################################
-
-CHTYPE = 'chua'         # Lorenz, Rossler, Rikitake, Nose-Hoover, etc.
-NW = 2000               # Number of ODE's dots
+CHTYPE = 'Lorenz'       # Lorenz, Rossler, Rikitake, Nose-Hoover, etc.
+NW = 10000              # Number of ODE's dots
 dt = 100                # Step for equations
 
 NFFT = 2**12            # Number of FFT dots
@@ -444,69 +257,96 @@ zt = np.zeros(NW)
 xt[0], yt[0], zt[0] = 1.0, 0.5, 1.0
 
 # Set system parameters: Lorenz, Rossler, Rikitake
-lorenz_args = {
-    'sigma': 10,
-    'beta': 8/3,
-    'rho': 28,
-}
 
-rossler_args = {
-    'a': 0.2,
-    'b': 0.2,
-    'c': 5.7,
-}
+CHUA_ARGS = {'alpha': 0.1, 'beta': 28, 'mu0': -1.143, 'mu1': -0.714}
+LORENZ_ARGS = {'sigma': 10, 'beta': 8/3, 'rho': 28}
+ROSSLER_ARGS = {'a': 0.2, 'b': 0.2, 'c': 5.7}
+DUFFING_ARGS = {'a': 0.1, 'b': 11}
+RIKITAKE_ARGS = {'a': 1, 'mu': 1}
 
-rikitake_args = {
-    'a': 1,
-    'mu': 1,
-}
+# #####################################################################
+# Calculate attractor
+# #####################################################################
 
-duffing_args = {
-    'a': 0.1,
-    'b': 11,
-}
-
-chua_args = {
-    'alpha': 0.1,
-    'beta': 28,
-    'mu0': -1.143,
-    'mu1': -0.714,
-}
-
-
-# Calculate the next coordinates of system
+print('Start analyzing the next chaotic system: [%s]' % CHTYPE)
 for i in range(NW-1):
     ch_type = CHTYPE.casefold()
-    if ch_type == 'lorenz':
-        x_next, y_next, z_next = lorenz(xt[i], yt[i], zt[i], **lorenz_args)
-    elif ch_type == 'rossler':
-        x_next, y_next, z_next = rossler(xt[i], yt[i], zt[i], **rossler_args)
-    elif ch_type == 'rikitake':
-        x_next, y_next, z_next = rikitake(xt[i], yt[i], zt[i], **rikitake_args)
+    if ch_type == 'wang':
+        x_next, y_next, z_next = wang(xt[i], yt[i], zt[i])
     elif ch_type == 'nose-hoover':
         x_next, y_next, z_next = nose_hoover(xt[i], yt[i], zt[i])
-    elif ch_type == 'duffing':
-        x_next, y_next, z_next = duffing(xt[i], yt[i], zt[i], **duffing_args)
-    elif ch_type == 'chua':
-        x_next, y_next, z_next = chua(xt[i], yt[i], zt[i], **chua_args)
-    elif ch_type == 'chua2':
-        x_next, y_next, z_next = chua(xt[i], yt[i], zt[i])
-    elif ch_type == 'wang':
-        x_next, y_next, z_next = wang(xt[i], yt[i], zt[i])
     elif ch_type == 'lotka':
         x_next, y_next, z_next = lotka_volterra(xt[i], yt[i], zt[i])
+    elif ch_type == 'chua':
+        x_next, y_next, z_next = chua(xt[i], yt[i], zt[i], **CHUA_ARGS)
+    elif ch_type == 'lorenz':
+        x_next, y_next, z_next = lorenz(xt[i], yt[i], zt[i], **LORENZ_ARGS)
+    elif ch_type == 'rossler':
+        x_next, y_next, z_next = rossler(xt[i], yt[i], zt[i], **ROSSLER_ARGS)
+    elif ch_type == 'duffing':
+        x_next, y_next, z_next = duffing(xt[i], yt[i], zt[i], **DUFFING_ARGS)
+    elif ch_type == 'rikitake':
+        x_next, y_next, z_next = rikitake(xt[i], yt[i], zt[i], **RIKITAKE_ARGS)
     else:
         raise Exception('Error: you should set the correct chaotic system')
 
-    # x_next, y_next, z_next = rikitake(xt[i], yt[i], zt[i], **rikitake_params)
-    #
     xt[i+1] = xt[i] + (x_next / dt)
     yt[i+1] = yt[i] + (y_next / dt)
     zt[i+1] = zt[i] + (z_next / dt)
 
+# #####################################################################
+# Calculate standardized moments
+# #####################################################################
+
+D3 = ['X', 'Y', 'Z']
+ch_3d = np.stack((xt, yt, zt))
+
+print('Calculate mean, variance, skewness, kurtosis and median for each '
+      'coordinate of chaotic system:')
+M15 = np.zeros([3, 5])
+for i in range(ch_3d.shape[0]):
+    M15[i, 0] = np.mean(ch_3d[..., i])      # Mean
+    M15[i, 1] = np.var(ch_3d[..., i])       # Variance
+    M15[i, 2] = skew(ch_3d[..., i])         # Skewness
+    M15[i, 3] = kurtosis(ch_3d[..., i])     # Kurtosis
+    M15[i, 4] = np.median(ch_3d[..., i])    # Median
+
+    print('%s axis: ' % D3[i], end='')
+    print('Mt:  {:+.4f},  '.format(M15[i, 0]), end='')
+    print('Dt:  {:+.4f},  '.format(M15[i, 1]), end='')
+    print('At:  {:+.4f},  '.format(M15[i, 2]), end='')
+    print('Et:  {:+.4f},  '.format(M15[i, 3]), end='')
+    print('Mdt: {:+.4f}.  '.format(M15[i, 4]))
+
+# Find Probability density function
+p_axi = np.linspace(xt.min(), xt.max(), 1000)
+x_kde = gaussian_kde(xt)
+y_kde = gaussian_kde(yt)
+z_kde = gaussian_kde(zt)
+p_xyz = [x_kde(p_axi), y_kde(p_axi), z_kde(p_axi)]
+
+# #####################################################################
+# Calculate Autocorrelation (Cross-correlation) and FFT
+# #####################################################################
+
+# TODO implement FFT and autocorrelation
+x_acf = np.corrcoef(xt[:-1], xt[:1])
+y_acf = np.corrcoef(yt[:-1], yt[:1])
+z_acf = np.corrcoef(zt[:-1], zt[:1])
+# x_acf = np.correlate(xt, xt, 'same')
+# y_acf = np.correlate(yt, yt, 'same')
+# z_acf = np.correlate(zt, zt, 'same')
+
 x_fft = fft(xt, NFFT)
 y_fft = fft(xt, NFFT)
 z_fft = fft(xt, NFFT)
+
+# Plot 2D coordinates in time axis
+fig3 = plt.figure('Coordinates evolution in time')
+plt.plot(x_acf, linewidth=0.75)
+plt.grid()
+plt.tight_layout()
+plt.show()
 
 # #####################################################################
 # Plot results
@@ -539,71 +379,71 @@ minmax_z = [np.min(zt), np.max(zt)]
 # ax.set_title("3D Chaotic Attractor")
 # plt.tight_layout()
 
-
 # Plot 2D coordinates of 3D model
-fig2 = plt.figure('2D Coordinates')
-plt.subplot(2, 2, 1)
-plt.plot(yt, xt, linewidth=0.75)
-plt.grid()
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.xlim(minmax_y)
-plt.ylim(minmax_x)
-
-plt.subplot(2, 2, 2)
-plt.plot(yt, zt, linewidth=0.75)
-plt.grid()
-plt.xlabel('Z')
-plt.ylabel('Y')
-plt.xlim(minmax_y)
-plt.ylim(minmax_z)
-
-plt.subplot(2, 2, 3)
-plt.plot(zt, xt, linewidth=0.75)
-plt.grid()
-plt.xlabel('X')
-plt.ylabel('Z')
-plt.xlim(minmax_z)
-plt.ylim(minmax_x)
-
-ax = fig2.add_subplot(2, 2, 4, projection='3d')
-ax.plot(xt, yt, zt, linewidth=0.7)
-ax.set_xlabel("X")
-ax.set_ylabel("Y")
-ax.set_zlabel("Z")
-plt.tight_layout()
-
-
-# Plot 2D coordinates in time axis
-fig3 = plt.figure('Coordinates evolution in time')
-plt.subplot(2, 2, 1)
-plt.plot(xt, linewidth=0.75)
-plt.grid()
-plt.ylabel('X')
-plt.xlim([0, NW-1])
-plt.ylim(minmax_x)
-
-plt.subplot(2, 2, 2)
-plt.plot(yt, linewidth=0.75)
-plt.grid()
-plt.ylabel('Y')
-
-plt.xlim([0, NW-1])
-plt.ylim(minmax_y)
-
-plt.subplot(2, 2, 3)
-plt.plot(zt, linewidth=0.75)
-plt.grid()
-plt.ylabel('Z')
-plt.xlim([0, NW-1])
-plt.ylim(minmax_z)
-
-# plt.subplot(2, 2, 4)
+# fig2 = plt.figure('2D Coordinates')
+# plt.subplot(2, 2, 1)
+# plt.plot(yt, xt, linewidth=0.75)
+# plt.grid()
+# plt.xlabel('X')
+# plt.ylabel('Y')
+# plt.xlim(minmax_y)
+# plt.ylim(minmax_x)
+#
+# plt.subplot(2, 2, 2)
+# plt.plot(yt, zt, linewidth=0.75)
+# plt.grid()
+# plt.xlabel('Z')
+# plt.ylabel('Y')
+# plt.xlim(minmax_y)
+# plt.ylim(minmax_z)
+#
+# plt.subplot(2, 2, 3)
+# plt.plot(zt, xt, linewidth=0.75)
+# plt.grid()
+# plt.xlabel('X')
+# plt.ylabel('Z')
+# plt.xlim(minmax_z)
+# plt.ylim(minmax_x)
+#
+# ax = fig2.add_subplot(2, 2, 4, projection='3d')
+# ax.plot(xt, yt, zt, linewidth=0.7)
+# ax.set_xlabel("X")
+# ax.set_ylabel("Y")
+# ax.set_zlabel("Z")
+# plt.tight_layout()
+#
+#
+# # Plot 2D coordinates in time axis
+# fig3 = plt.figure('Coordinates evolution in time')
+# plt.subplot(2, 2, 1)
 # plt.plot(xt, linewidth=0.75)
+# plt.grid()
+# plt.ylabel('X')
+# plt.xlim([0, NW-1])
+# plt.ylim(minmax_x)
+#
+# plt.subplot(2, 2, 2)
 # plt.plot(yt, linewidth=0.75)
+# plt.grid()
+# plt.ylabel('Y')
+#
+# plt.xlim([0, NW-1])
+# plt.ylim(minmax_y)
+#
+# plt.subplot(2, 2, 3)
 # plt.plot(zt, linewidth=0.75)
 # plt.grid()
-# plt.ylabel('XYZ')
+# plt.ylabel('Z')
 # plt.xlim([0, NW-1])
-plt.tight_layout()
-plt.show()
+# plt.ylim(minmax_z)
+#
+# # plt.subplot(2, 2, 4)
+# # plt.plot(xt, linewidth=0.75)
+# # plt.plot(yt, linewidth=0.75)
+# # plt.plot(zt, linewidth=0.75)
+# # plt.grid()
+# # plt.ylabel('XYZ')
+# # plt.xlim([0, NW-1])
+# plt.tight_layout()
+# plt.show()
+
