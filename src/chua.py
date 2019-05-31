@@ -1,28 +1,38 @@
 """
 ------------------------------------------------------------------------
 
-Title         : rikitake.py
+Title         : chua.py
 Author        : Alexander Kapitanov
 E-mail        : sallador@bk.ru
 Lang.         : python
 Company       :
-Release Date  : 2019/05/30
+Release Date  : 2019/05/31
 
 ------------------------------------------------------------------------
 
 Description   :
-    Rikitake system is ordinary differential equation (ODE) of
-    3rd order system.
-    Rikitake system attempts to explain the reversal of the Earth’s
-    magnetic field.
+    Chua circuit. This is a simple electronic circuit that exhibits
+    classic chaotic behavior.
 
-    Rikitake equations are:
-        dx/dt = -mu * x + z * y
-        dy/dt = -mu * y + x * (z - a)
-        dz/dt = 1 - x * y
+    Chua equations are:
+    Eq. 1:
+        dx/dt = alpha * (y - x - ht)
+        dy/dt = x - y + z
+        dz/dt = -beta * y
 
-    where a, mu - are Rikitake system parameters. Default values are
-    a = 5, mu = 2 or a = mu = 1.
+    where ht = mu1*x + 0.5*(mu0 - mu1)*(np.abs(x + 1) - np.abs(x - 1))
+    and alpha, beta, mu0 and mu1 - are Chua system parameters.
+
+    Default values are:
+    alpha = 15.6
+    beta = 28
+    mu0 = -1.143
+    mu1 = -0.714
+
+    Eq. 2:
+        dx/dt = 0.3*y + x - x**3
+        dy/dt = x + z
+        dz/dt = y
 
 ------------------------------------------------------------------------
 
@@ -51,27 +61,30 @@ OR CORRECTION.
 
 ------------------------------------------------------------------------
 """
+import numpy as np
 
 
-def rikitake(x=0, y=0, z=0, **kwargs):
+def chua(x=0, y=0, z=1, **kwargs):
     """
-    Calculate the next coordinate X, Y, Z for 3rd-order Rikitake system
+    Calculate the next coordinate X, Y, Z for Chua system.
 
     Parameters
     ----------
     x, y, z : float
         Input coordinates Z, Y, Z respectively
     kwargs : float
-        mu, a - are Rikitake system parameters
-
+        alpha, beta, mu0, mu1 - are Chua system parameters
     """
-    # Default Rikitake parameters:
-    a = kwargs.get('a', 5)
-    mu = kwargs.get('mu', 2)
+    # Default parameters:
+    alpha = kwargs.get('alpha', 15.6)
+    beta = kwargs.get('beta', 28)
+    mu0 = kwargs.get('mu0', -1.143)
+    mu1 = kwargs.get('mu1', -0.714)
 
+    ht = mu1*x + 0.5*(mu0 - mu1)*(np.abs(x + 1) - np.abs(x - 1))
     # Next step coordinates:
-    x_out = -mu * x + z * y
-    y_out = -mu * y + x * (z - a)
-    z_out = 1 - x * y
+    x_out = alpha*(y - x - ht)
+    y_out = x - y + z
+    z_out = -beta*y
 
     return x_out, y_out, z_out

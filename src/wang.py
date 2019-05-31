@@ -1,28 +1,22 @@
 """
 ------------------------------------------------------------------------
 
-Title         : rikitake.py
+Title         : wang.py
 Author        : Alexander Kapitanov
 E-mail        : sallador@bk.ru
 Lang.         : python
 Company       :
-Release Date  : 2019/05/30
+Release Date  : 2019/05/31
 
 ------------------------------------------------------------------------
 
 Description   :
-    Rikitake system is ordinary differential equation (ODE) of
-    3rd order system.
-    Rikitake system attempts to explain the reversal of the Earth’s
-    magnetic field.
+    Wang system (improved Lorenz model) as classic chaotic attractor
 
-    Rikitake equations are:
-        dx/dt = -mu * x + z * y
-        dy/dt = -mu * y + x * (z - a)
-        dz/dt = 1 - x * y
-
-    where a, mu - are Rikitake system parameters. Default values are
-    a = 5, mu = 2 or a = mu = 1.
+    Wang equations are:
+        dx/dt = x - y*z
+        dy/dt = x - y + x*z
+        dz/dt = -3*z + x*y
 
 ------------------------------------------------------------------------
 
@@ -53,25 +47,17 @@ OR CORRECTION.
 """
 
 
-def rikitake(x=0, y=0, z=0, **kwargs):
+def wang(x=0, y=0, z=0):
     """
-    Calculate the next coordinate X, Y, Z for 3rd-order Rikitake system
+    Calculate the next coordinate X, Y, Z for 3rd-order Wang Attractor
 
     Parameters
     ----------
     x, y, z : float
         Input coordinates Z, Y, Z respectively
-    kwargs : float
-        mu, a - are Rikitake system parameters
-
     """
-    # Default Rikitake parameters:
-    a = kwargs.get('a', 5)
-    mu = kwargs.get('mu', 2)
-
     # Next step coordinates:
-    x_out = -mu * x + z * y
-    y_out = -mu * y + x * (z - a)
-    z_out = 1 - x * y
-
+    x_out = x - y*z
+    y_out = x - y + x*z
+    z_out = -3*z + x*y
     return x_out, y_out, z_out

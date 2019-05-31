@@ -11,8 +11,8 @@ Release Date  : 2019/05/30
 ------------------------------------------------------------------------
 
 Description   : This is the main module which collects attractors
-                together. You can choose: Lorenz, Rossler, Rikitake or
-                Nose-Hoover
+                together. You can choose: Lorenz, Rossler, Rikitake,
+                Nose-Hoover, Chua, Lottki, Duffing, Wang etc.
 
     ----------
     Lorenz:
@@ -63,7 +63,9 @@ Description   : This is the main module which collects attractors
     where a, b and sigma - are Rossler system parameters. Default
     values are: a = 0.2, b = 0.2 and c = 5.7.
 
-    Also you can set: a = 0.1, b = 0.1 and c = 14.
+    1) a = 0.2, b = 0.2 and c = 5.7 (Standard model)
+    2) a = 0.1, b = 0.1 and c = 14 (another useful parameters)
+    3) a = 0.5, b = 1.0 and c = 3 (J. C. Sprott)
 
     Wiki (Varying parameters);
 
@@ -111,6 +113,81 @@ Description   : This is the main module which collects attractors
         dz/dt = 1 - y * y
 
     Nose–Hoover system doesn't have any system parameters.
+
+    ----------
+    Wang attractor:
+    ----------
+    Wang system (improved Lorenz model) as classic chaotic attractor
+
+    Wang equations are:
+        dx/dt = x - y*z
+        dy/dt = x - y + x*z
+        dz/dt = -3*z + x*y
+
+    ----------
+    Duffing map:
+    ----------
+    It is a discrete-time dynamical system (2nd order)
+    The map depends on the two constants: a and b.
+    Z coordinate is a linear function.
+
+    Duffing equations are:
+    Eq. 1:
+        dx/dt = y
+        dy/dt = -a*y - x**3 + b * cos(z)
+        dz/dt = 1
+    where a = 0.1 and b = 11 (default parameters)
+
+    Eq. 2:
+        dx/dt = y
+        dy/dt = a*y - y**3 - b*x
+        dz/dt = 1
+    where a = 2.75 and b = 0.2 (default parameters)
+
+    ----------
+    Chua circuit:
+    ----------
+    Chua circuit. This is a simple electronic circuit that exhibits
+    classic chaotic behavior.
+
+    Chua equations are:
+    Eq. 1:
+        dx/dt = alpha * (y - x - ht)
+        dy/dt = x - y + z
+        dz/dt = -beta * y
+
+    where ht = mu1*x + 0.5*(mu0 - mu1)*(np.abs(x + 1) - np.abs(x - 1))
+    and alpha, beta, mu0 and mu1 - are Chua system parameters.
+
+    Default values are:
+    alpha = 15.6
+    beta = 28
+    mu0 = -1.143
+    mu1 = -0.714
+
+    Eq. 2:
+        dx/dt = 0.3*y + x - x**3
+        dy/dt = x + z
+        dz/dt = y
+
+    ----------
+    Lotka–Volterra:
+    ----------
+    The Lotka–Volterra equations, also known as the predator–prey
+    equations.
+
+    Chaotic Lotka-Volterra model require a careful tuning of
+    parameters and are even less likely to exhibit chaos as the number
+    of species increases.
+
+    Lotka–Volterra equations are:
+    Eq. 1:
+        dx/dt = x * (1 - x - 9*y)
+        dy/dt = -y * (1 - 6*x - y + 9*z)
+        dz/dt = z * (1 - 3*x - z)
+
+    Be careful! Init parameters of x, y, z should be set right.
+    For example, [x, y, z] = [0.6; 0.2; 0.01].
 
 ------------------------------------------------------------------------
 
@@ -161,15 +238,14 @@ def lorenz(x=0, y=0, z=0, **kwargs):
         Input coordinates Z, Y, Z respectively
     kwargs : float
         beta, rho and sigma - are Lorenz system parameters
-
     """
-    # Default Lorenz parameters:
+    # Default parameters:
     sigma = kwargs.get('sigma', 10)
     beta = kwargs.get('beta', 8/3)
     rho = kwargs.get('rho', 28)
 
     # Next step coordinates:
-    x_out = sigma * (y - x)
+    x_out = sigma*(y - x)
     y_out = rho*x - y - x*z
     z_out = x*y - beta*z
     return x_out, y_out, z_out
@@ -185,17 +261,16 @@ def rossler(x=0, y=0, z=0, **kwargs):
         Input coordinates Z, Y, Z respectively
     kwargs : float
         a, b and c - are Rossler system parameters
-
     """
-    # Default Rossler parameters:
+    # Default parameters:
     aa = kwargs.get('a', 0.2)
     bb = kwargs.get('b', 0.2)
     cc = kwargs.get('c', 5.7)
 
     # Next step coordinates:
     x_out = -(y + z)
-    y_out = x + aa * y
-    z_out = bb + z * (x - cc)
+    y_out = x + aa*y
+    z_out = bb + z*(x - cc)
     return x_out, y_out, z_out
 
 
@@ -209,16 +284,15 @@ def rikitake(x=0, y=0, z=0, **kwargs):
         Input coordinates Z, Y, Z respectively
     kwargs : float
         mu, a - are Rikitake system parameters
-
     """
-    # Default Rikitake parameters:
+    # Default parameters:
     aa = kwargs.get('a', 5)
     mu = kwargs.get('mu', 2)
 
     # Next step coordinates:
-    x_out = -mu * x + z * y
-    y_out = -mu * y + x * (z - aa)
-    z_out = 1 - x * y
+    x_out = -mu*x + z*y
+    y_out = -mu*y + x*(z - aa)
+    z_out = 1 - x*y
 
     return x_out, y_out, z_out
 
@@ -231,12 +305,123 @@ def nose_hoover(x=0, y=0, z=0):
     ----------
     x, y, z : float
         Input coordinates Z, Y, Z respectively
-
     """
     # Next step coordinates:
     x_out = y
-    y_out = y * z - x
-    z_out = 1 - y * y
+    y_out = y*z - x
+    z_out = 1 - y**2
+    return x_out, y_out, z_out
+
+
+def wang(x=0, y=0, z=0):
+    """
+    Calculate the next coordinate X, Y, Z for 3rd-order Wang Attractor
+
+    Parameters
+    ----------
+    x, y, z : float
+        Input coordinates Z, Y, Z respectively
+    """
+    # Next step coordinates:
+    x_out = x - y*z
+    y_out = x - y + x*z
+    z_out = -3*z + x*y
+    return x_out, y_out, z_out
+
+
+def duffing(x=0, y=0, z=0, **kwargs):
+    """
+    Calculate the next coordinate X, Y, Z for Duffing map.
+    It is 2nd order attractor (Z coordinate = 1)
+
+    Duffing map:
+    Eq. 1:
+        dx/dt = y
+        dy/dt = -a*y - x**3 + b * cos(z)
+        dz/dt = 1
+    where a = 0.1 and b = 11 (default parameters)
+
+    Eq. 2:
+        dx/dt = y
+        dy/dt = a*y - y**3 - b*x
+        dz/dt = 1
+    where a = 2.75 and b = 0.2 (default parameters)
+
+    Parameters
+    ----------
+    x, y, z : float
+        Input coordinates Z, Y, Z respectively
+    kwargs : float
+        a and b - are Duffing system parameters
+    """
+    # Default parameters:
+    # a = kwargs.get('a', 2.75)
+    # b = kwargs.get('b', 0.2)
+    a = kwargs.get('a', 0.1)
+    b = kwargs.get('b', 11)
+
+    # Next step coordinates:
+    x_out = y
+    y_out = -a*y - x**3 + b*np.cos(z)
+    # y_out = a*y - y**3 - b*x
+    z_out = 1
+    return x_out, y_out, z_out
+
+
+def lotka_volterra(x=0, y=0, z=0):
+    """
+    Calculate the next coordinate X, Y, Z for Lotka–Volterra
+
+    Parameters
+    ----------
+    x, y, z : float
+        Input coordinates Z, Y, Z respectively
+    """
+    # Next step coordinates:
+    x_out = x*(1 - x - 9*y)
+    y_out = -y*(1 - 6*x - y + 9*z)
+    z_out = z*(1 - 3*x - z)
+    return x_out, y_out, z_out
+
+
+def chua(x=0, y=0, z=1, **kwargs):
+    """
+    Calculate the next coordinate X, Y, Z for Chua system.
+
+    Parameters
+    ----------
+    x, y, z : float
+        Input coordinates Z, Y, Z respectively
+    kwargs : float
+        alpha, beta, mu0, mu1 - are Chua system parameters
+    """
+    # Default parameters:
+    alpha = kwargs.get('alpha', 15.6)
+    beta = kwargs.get('beta', 28)
+    mu0 = kwargs.get('mu0', -1.143)
+    mu1 = kwargs.get('mu1', -0.714)
+
+    ht = mu1*x + 0.5*(mu0 - mu1)*(np.abs(x + 1) - np.abs(x - 1))
+    # Next step coordinates:
+    x_out = alpha*(y - x - ht)
+    y_out = x - y + z
+    z_out = -beta*y
+    return x_out, y_out, z_out
+
+
+def chua2(x=0, y=0, z=1):
+    """
+    Calculate the next coordinate X, Y, Z for Chua system.
+
+    Parameters
+    ----------
+    x, y, z : float
+        Input coordinates Z, Y, Z respectively
+    """
+    # Next step coordinates:
+    x_out = 0.3*y + x - x**3
+    y_out = x + z
+    z_out = y
     return x_out, y_out, z_out
 
 
@@ -244,11 +429,11 @@ def nose_hoover(x=0, y=0, z=0):
 # Calculate attractor
 # #####################################################################
 
-CHTYPE = 'Rossler'      # Lorenz, Rossler, Rikitake, Nose-Hoover
-NW = 10000              # Number of ODE's dots
-dt = 100                # Step for equations (leave default as 100)
+CHTYPE = 'chua'         # Lorenz, Rossler, Rikitake, Nose-Hoover, etc.
+NW = 2000               # Number of ODE's dots
+dt = 100                # Step for equations
 
-NFFT = 2**15            # Number of FFT dots
+NFFT = 2**12            # Number of FFT dots
 
 # Create zero arrays for coordinates
 xt = np.zeros(NW)
@@ -256,25 +441,38 @@ yt = np.zeros(NW)
 zt = np.zeros(NW)
 
 # Set initial values for [X, Y, Z]
-xt[0], yt[0], zt[0] = 0.0, 1.0, 0.0
+xt[0], yt[0], zt[0] = 1.0, 0.5, 1.0
 
 # Set system parameters: Lorenz, Rossler, Rikitake
 lorenz_args = {
     'sigma': 10,
     'beta': 8/3,
-    'rho': 28
+    'rho': 28,
 }
 
 rossler_args = {
     'a': 0.2,
     'b': 0.2,
-    'c': 5.7
+    'c': 5.7,
 }
 
 rikitake_args = {
     'a': 1,
-    'mu': 1
+    'mu': 1,
 }
+
+duffing_args = {
+    'a': 0.1,
+    'b': 11,
+}
+
+chua_args = {
+    'alpha': 0.1,
+    'beta': 28,
+    'mu0': -1.143,
+    'mu1': -0.714,
+}
+
 
 # Calculate the next coordinates of system
 for i in range(NW-1):
@@ -287,6 +485,16 @@ for i in range(NW-1):
         x_next, y_next, z_next = rikitake(xt[i], yt[i], zt[i], **rikitake_args)
     elif ch_type == 'nose-hoover':
         x_next, y_next, z_next = nose_hoover(xt[i], yt[i], zt[i])
+    elif ch_type == 'duffing':
+        x_next, y_next, z_next = duffing(xt[i], yt[i], zt[i], **duffing_args)
+    elif ch_type == 'chua':
+        x_next, y_next, z_next = chua(xt[i], yt[i], zt[i], **chua_args)
+    elif ch_type == 'chua2':
+        x_next, y_next, z_next = chua(xt[i], yt[i], zt[i])
+    elif ch_type == 'wang':
+        x_next, y_next, z_next = wang(xt[i], yt[i], zt[i])
+    elif ch_type == 'lotka':
+        x_next, y_next, z_next = lotka_volterra(xt[i], yt[i], zt[i])
     else:
         raise Exception('Error: you should set the correct chaotic system')
 
@@ -390,12 +598,12 @@ plt.ylabel('Z')
 plt.xlim([0, NW-1])
 plt.ylim(minmax_z)
 
-plt.subplot(2, 2, 4)
-plt.plot(xt, linewidth=0.75)
-plt.plot(yt, linewidth=0.75)
-plt.plot(zt, linewidth=0.75)
-plt.grid()
-plt.ylabel('XYZ')
-plt.xlim([0, NW-1])
+# plt.subplot(2, 2, 4)
+# plt.plot(xt, linewidth=0.75)
+# plt.plot(yt, linewidth=0.75)
+# plt.plot(zt, linewidth=0.75)
+# plt.grid()
+# plt.ylabel('XYZ')
+# plt.xlim([0, NW-1])
 plt.tight_layout()
 plt.show()

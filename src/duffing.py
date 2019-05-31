@@ -1,28 +1,33 @@
 """
 ------------------------------------------------------------------------
 
-Title         : rikitake.py
+Title         : duffing.py
 Author        : Alexander Kapitanov
 E-mail        : sallador@bk.ru
 Lang.         : python
 Company       :
-Release Date  : 2019/05/30
+Release Date  : 2019/05/31
 
 ------------------------------------------------------------------------
 
 Description   :
-    Rikitake system is ordinary differential equation (ODE) of
-    3rd order system.
-    Rikitake system attempts to explain the reversal of the Earth’s
-    magnetic field.
+    Duffing map. It is a discrete-time dynamical system (2nd order)
+    The map depends on the two constants: a and b.
+    Z coordinate is a linear function.
 
-    Rikitake equations are:
-        dx/dt = -mu * x + z * y
-        dy/dt = -mu * y + x * (z - a)
-        dz/dt = 1 - x * y
+    Duffing equations are:
+    Eq. 1:
+        dx/dt = y
+        dy/dt = -a*y - x**3 + b * cos(z)
+        dz/dt = 1
+    where a = 0.1 and b = 11 (default parameters)
 
-    where a, mu - are Rikitake system parameters. Default values are
-    a = 5, mu = 2 or a = mu = 1.
+    Eq. 2:
+        dx/dt = y
+        dy/dt = a*y - y**3 - b*x
+        dz/dt = 1
+    where a = 2.75 and b = 0.2 (default parameters)
+
 
 ------------------------------------------------------------------------
 
@@ -51,27 +56,43 @@ OR CORRECTION.
 
 ------------------------------------------------------------------------
 """
+import numpy as np
 
 
-def rikitake(x=0, y=0, z=0, **kwargs):
+def duffing(x=0, y=0, z=0, **kwargs):
     """
-    Calculate the next coordinate X, Y, Z for 3rd-order Rikitake system
+    Calculate the next coordinate X, Y, Z for Duffing map.
+    It is 2nd order attractor (Z coordinate = 1)
+
+    Duffing map:
+    Eq. 1:
+        dx/dt = y
+        dy/dt = -a*y - x**3 + b * cos(z)
+        dz/dt = 1
+    where a = 0.1 and b = 11 (default parameters)
+
+    Eq. 2:
+        dx/dt = y
+        dy/dt = a*y - y**3 - b*x
+        dz/dt = 1
+    where a = 2.75 and b = 0.2 (default parameters)
 
     Parameters
     ----------
     x, y, z : float
         Input coordinates Z, Y, Z respectively
     kwargs : float
-        mu, a - are Rikitake system parameters
-
+        a and b - are Duffing system parameters
     """
-    # Default Rikitake parameters:
-    a = kwargs.get('a', 5)
-    mu = kwargs.get('mu', 2)
+    # Default parameters:
+    # a = kwargs.get('a', 2.75)
+    # b = kwargs.get('b', 0.2)
+    a = kwargs.get('a', 0.1)
+    b = kwargs.get('b', 11)
 
     # Next step coordinates:
-    x_out = -mu * x + z * y
-    y_out = -mu * y + x * (z - a)
-    z_out = 1 - x * y
-
+    x_out = y
+    y_out = -a*y - x**3 + b*np.cos(z)
+    # y_out = a*y - y**3 - b*x
+    z_out = 1
     return x_out, y_out, z_out
