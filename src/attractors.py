@@ -223,8 +223,8 @@ OR CORRECTION.
 
 import numpy as np
 from scipy.stats import kurtosis, skew, gaussian_kde
-from scipy.fftpack import fft
-from scipy.signal import convolve
+from scipy.fftpack import fft, fftshift
+from scipy.signal import correlate
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d  # noqa # pylint: disable=unused-import
@@ -243,7 +243,7 @@ from src.lotka_volterra import lotka_volterra
 # #####################################################################
 
 CHTYPE = 'Lorenz'       # Lorenz, Rossler, Rikitake, Nose-Hoover, etc.
-NW = 10000              # Number of ODE's dots
+NW = 5000               # Number of ODE's dots
 dt = 100                # Step for equations
 
 NFFT = 2**12            # Number of FFT dots
@@ -268,7 +268,7 @@ RIKITAKE_ARGS = {'a': 1, 'mu': 1}
 # Calculate attractor
 # #####################################################################
 
-print('Start analyzing the next chaotic system: [%s]' % CHTYPE)
+print('Start analyzing the next chaotic system: [%s]\n' % CHTYPE)
 for i in range(NW-1):
     ch_type = CHTYPE.casefold()
     if ch_type == 'wang':
@@ -301,50 +301,59 @@ for i in range(NW-1):
 D3 = ['X', 'Y', 'Z']
 ch_3d = np.stack((xt, yt, zt))
 
+Nn, Mm = ch_3d.shape[0], ch_3d.shape[1]
 print('Calculate mean, variance, skewness, kurtosis and median for each '
       'coordinate of chaotic system:')
-M15 = np.zeros([3, 5])
-for i in range(ch_3d.shape[0]):
-    M15[i, 0] = np.mean(ch_3d[..., i])      # Mean
-    M15[i, 1] = np.var(ch_3d[..., i])       # Variance
-    M15[i, 2] = skew(ch_3d[..., i])         # Skewness
-    M15[i, 3] = kurtosis(ch_3d[..., i])     # Kurtosis
-    M15[i, 4] = np.median(ch_3d[..., i])    # Median
+
+M15 = np.zeros([Nn, Mm])
+for i in range(Nn):
+    M15[i, 0] = np.mean(ch_3d[i, :])      # Mean
+    M15[i, 1] = np.var(ch_3d[i, :])       # Variance
+    M15[i, 2] = skew(ch_3d[i, :])         # Skewness
+    M15[i, 3] = kurtosis(ch_3d[i, :])     # Kurtosis
+    M15[i, 4] = np.median(ch_3d[i, :])    # Median
 
     print('%s axis: ' % D3[i], end='')
-    print('Mt:  {:+.4f},  '.format(M15[i, 0]), end='')
-    print('Dt:  {:+.4f},  '.format(M15[i, 1]), end='')
-    print('At:  {:+.4f},  '.format(M15[i, 2]), end='')
-    print('Et:  {:+.4f},  '.format(M15[i, 3]), end='')
-    print('Mdt: {:+.4f}.  '.format(M15[i, 4]))
+    print('M[t]:  {:+.4f},  '.format(M15[i, 0]), end='')
+    print('D[t]:  {:+.4f},  '.format(M15[i, 1]), end='')
+    print('A[t]:  {:+.4f},  '.format(M15[i, 2]), end='')
+    print('E[t]:  {:+.4f},  '.format(M15[i, 3]), end='')
+    print('Md[t]: {:+.4f}.  '.format(M15[i, 4]))
 
 # Find Probability density function
-p_axi = np.linspace(xt.min(), xt.max(), 1000)
-x_kde = gaussian_kde(xt)
-y_kde = gaussian_kde(yt)
-z_kde = gaussian_kde(zt)
-p_xyz = [x_kde(p_axi), y_kde(p_axi), z_kde(p_axi)]
+N = 1000
+p_axi = np.zeros([Nn, N])
+d_kde = np.zeros([Nn, N])
+for i in range(Nn):
+    p_axi[i] = np.linspace(ch_3d[i, :].min(), ch_3d[i, :].max(), N)
+    d_kde[i] = gaussian_kde(ch_3d[i, :]).evaluate(p_axi[i, :])
+    d_kde[i] /= d_kde[i].max()
 
 # #####################################################################
 # Calculate Autocorrelation (Cross-correlation) and FFT
 # #####################################################################
 
 # TODO implement FFT and autocorrelation
-x_acf = np.corrcoef(xt[:-1], xt[:1])
-y_acf = np.corrcoef(yt[:-1], yt[:1])
-z_acf = np.corrcoef(zt[:-1], zt[:1])
-# x_acf = np.correlate(xt, xt, 'same')
-# y_acf = np.correlate(yt, yt, 'same')
-# z_acf = np.correlate(zt, zt, 'same')
+d_acf = np.zeros([Nn, Mm])
+d_fft = np.zeros([Nn, NFFT], dtype=np.complex)
+for i in range(Nn):
+    d_acf[i] = np.correlate(ch_3d[i, :], ch_3d[i, :], 'same')
+    d_acf[i] /= d_acf[i].max()
+    d_fft[i] = fft(ch_3d[i, 1:NFFT], NFFT)
 
-x_fft = fft(xt, NFFT)
-y_fft = fft(xt, NFFT)
-z_fft = fft(xt, NFFT)
+d_fft = np.abs(fftshift(d_fft, axes=1))
+d_fft /= np.max(d_fft)
+d_fft = 20*np.log10(d_fft)
 
 # Plot 2D coordinates in time axis
-fig3 = plt.figure('Coordinates evolution in time')
-plt.plot(x_acf, linewidth=0.75)
-plt.grid()
+fig5 = plt.figure('Coordinates evolution in time')
+for i in range(Nn):
+    plt.subplot(2, 3, i+1)
+    plt.plot(d_acf[i], linewidth=0.75)
+    plt.grid()
+    plt.subplot(2, 3, i+1+3)
+    plt.plot(d_fft[i], linewidth=0.75)
+    plt.grid()
 plt.tight_layout()
 plt.show()
 
@@ -352,98 +361,122 @@ plt.show()
 # Plot results
 # #####################################################################
 
-SMALL_SIZE = 8
-MEDIUM_SIZE = 10
-BIGGER_SIZE = 16
+if 0:
+    SMALL_SIZE = 8
+    MEDIUM_SIZE = 10
+    BIGGER_SIZE = 16
 
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
 
-minmax_x = [np.min(xt), np.max(xt)]
-minmax_y = [np.min(yt), np.max(yt)]
-minmax_z = [np.min(zt), np.max(zt)]
+    minmax_x = [np.min(xt), np.max(xt)]
+    minmax_y = [np.min(yt), np.max(yt)]
+    minmax_z = [np.min(zt), np.max(zt)]
 
-# Plot 3D model
-# fig1 = plt.figure('3D model of chaotic system')
-#
-# ax = fig1.gca(projection='3d')
-# ax.plot(xt, yt, zt, 'o-', linewidth=0.1, markersize=0.3)
-# ax.set_xlabel("X")
-# ax.set_ylabel("Y")
-# ax.set_zlabel("Z")
-# ax.set_xlim(minmax_x)
-# ax.set_ylim(minmax_y)
-# ax.set_zlim(minmax_z)
-# ax.set_title("3D Chaotic Attractor")
-# plt.tight_layout()
+    # Plot 3D model
+    fig1 = plt.figure('3D model of chaotic system')
 
-# Plot 2D coordinates of 3D model
-# fig2 = plt.figure('2D Coordinates')
-# plt.subplot(2, 2, 1)
-# plt.plot(yt, xt, linewidth=0.75)
-# plt.grid()
-# plt.xlabel('X')
-# plt.ylabel('Y')
-# plt.xlim(minmax_y)
-# plt.ylim(minmax_x)
-#
-# plt.subplot(2, 2, 2)
-# plt.plot(yt, zt, linewidth=0.75)
-# plt.grid()
-# plt.xlabel('Z')
-# plt.ylabel('Y')
-# plt.xlim(minmax_y)
-# plt.ylim(minmax_z)
-#
-# plt.subplot(2, 2, 3)
-# plt.plot(zt, xt, linewidth=0.75)
-# plt.grid()
-# plt.xlabel('X')
-# plt.ylabel('Z')
-# plt.xlim(minmax_z)
-# plt.ylim(minmax_x)
-#
-# ax = fig2.add_subplot(2, 2, 4, projection='3d')
-# ax.plot(xt, yt, zt, linewidth=0.7)
-# ax.set_xlabel("X")
-# ax.set_ylabel("Y")
-# ax.set_zlabel("Z")
-# plt.tight_layout()
-#
-#
-# # Plot 2D coordinates in time axis
-# fig3 = plt.figure('Coordinates evolution in time')
-# plt.subplot(2, 2, 1)
-# plt.plot(xt, linewidth=0.75)
-# plt.grid()
-# plt.ylabel('X')
-# plt.xlim([0, NW-1])
-# plt.ylim(minmax_x)
-#
-# plt.subplot(2, 2, 2)
-# plt.plot(yt, linewidth=0.75)
-# plt.grid()
-# plt.ylabel('Y')
-#
-# plt.xlim([0, NW-1])
-# plt.ylim(minmax_y)
-#
-# plt.subplot(2, 2, 3)
-# plt.plot(zt, linewidth=0.75)
-# plt.grid()
-# plt.ylabel('Z')
-# plt.xlim([0, NW-1])
-# plt.ylim(minmax_z)
-#
-# # plt.subplot(2, 2, 4)
-# # plt.plot(xt, linewidth=0.75)
-# # plt.plot(yt, linewidth=0.75)
-# # plt.plot(zt, linewidth=0.75)
-# # plt.grid()
-# # plt.ylabel('XYZ')
-# # plt.xlim([0, NW-1])
-# plt.tight_layout()
-# plt.show()
+    ax = fig1.gca(projection='3d')
+    ax.plot(xt, yt, zt, 'o-', linewidth=0.1, markersize=0.3)
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    ax.set_xlim(minmax_x)
+    ax.set_ylim(minmax_y)
+    ax.set_zlim(minmax_z)
+    ax.set_title("3D Chaotic Attractor")
+    plt.tight_layout()
 
+    # Plot 2D coordinates of 3D model
+    fig2 = plt.figure('2D Coordinates')
+    plt.subplot(2, 2, 1)
+    plt.plot(yt, xt, linewidth=0.75)
+    plt.grid()
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.xlim(minmax_y)
+    plt.ylim(minmax_x)
+
+    plt.subplot(2, 2, 2)
+    plt.plot(yt, zt, linewidth=0.75)
+    plt.grid()
+    plt.xlabel('Z')
+    plt.ylabel('Y')
+    plt.xlim(minmax_y)
+    plt.ylim(minmax_z)
+
+    plt.subplot(2, 2, 3)
+    plt.plot(zt, xt, linewidth=0.75)
+    plt.grid()
+    plt.xlabel('X')
+    plt.ylabel('Z')
+    plt.xlim(minmax_z)
+    plt.ylim(minmax_x)
+
+    ax = fig2.add_subplot(2, 2, 4, projection='3d')
+    ax.plot(xt, yt, zt, linewidth=0.7)
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    plt.tight_layout()
+
+    # Plot 2D coordinates in time axis
+    fig3 = plt.figure('Coordinates evolution in time')
+    plt.subplot(2, 2, 1)
+    plt.plot(xt, linewidth=0.75)
+    plt.grid()
+    plt.ylabel('X')
+    plt.xlim([0, NW-1])
+    plt.ylim(minmax_x)
+
+    plt.subplot(2, 2, 2)
+    plt.plot(yt, linewidth=0.75)
+    plt.grid()
+    plt.ylabel('Y')
+
+    plt.xlim([0, NW-1])
+    plt.ylim(minmax_y)
+
+    plt.subplot(2, 2, 3)
+    plt.plot(zt, linewidth=0.75)
+    plt.grid()
+    plt.ylabel('Z')
+    plt.xlim([0, NW-1])
+    plt.ylim(minmax_z)
+    plt.tight_layout()
+
+    # Plot Probability density function
+    fig4 = plt.figure('Probability density function')
+    for i in range(Nn):
+        plt.plot(d_kde[i], '.')
+    plt.xlim([0, N-1])
+    plt.grid()
+    plt.tight_layout()
+
+    # Plot 2D coordinates in time axis
+    fig5 = plt.figure('Coordinates evolution in time')
+    plt.subplot(2, 2, 1)
+    plt.plot(xt, linewidth=0.75)
+    plt.grid()
+    plt.ylabel('X')
+    plt.xlim([0, NW-1])
+    plt.ylim(minmax_x)
+
+    plt.subplot(2, 2, 2)
+    plt.plot(yt, linewidth=0.75)
+    plt.grid()
+    plt.ylabel('Y')
+
+    plt.xlim([0, NW-1])
+    plt.ylim(minmax_y)
+
+    plt.subplot(2, 2, 3)
+    plt.plot(zt, linewidth=0.75)
+    plt.grid()
+    plt.ylabel('Z')
+    plt.xlim([0, NW-1])
+    plt.ylim(minmax_z)
+    plt.tight_layout()
+    plt.show()
