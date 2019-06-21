@@ -239,181 +239,196 @@ from src.nose_hoover import nose_hoover
 from src.lotka_volterra import lotka_volterra
 
 # #####################################################################
+# Functions
+# #####################################################################
+
+
+def sel_chaos(chtype=None, xt=0, yt=0, zt=0, **kwargs):
+    """
+    Select chaotic system function by name
+
+    Parameters
+    ----------
+    chtype : str
+        Select function
+    xt, yt, zt : float
+        Input coordinates Z, Y, Z respectively
+    kwargs : float
+        Chaotic system parameters
+
+    """
+    ch_case = chtype.casefold()
+    if ch_case == 'wang':
+        return wang(xt, yt, zt)
+    elif ch_case == 'nose-hoover':
+        return nose_hoover(xt, yt, zt)
+    elif ch_case == 'lotka':
+        return lotka_volterra(xt, yt, zt)
+    elif ch_case == 'chua':
+        return chua(xt, yt, zt, **kwargs)
+    elif ch_case == 'lorenz':
+        return lorenz(xt, yt, zt, **kwargs)
+    elif ch_case == 'rossler':
+        return rossler(xt, yt, zt, **kwargs)
+    elif ch_case == 'duffing':
+        return duffing(xt, yt, zt, **kwargs)
+    elif ch_case == 'rikitake':
+        return rikitake(xt, yt, zt, **kwargs)
+    else:
+        raise Exception('Error: you should set the correct chaotic system')
+
+
+def sel_args(chtype=None, args=None):
+    """
+    Select arguments for chaotic system
+
+    Parameters
+    ----------
+    chtype : str
+        Select function
+    args : dict
+        Chaotic system arguments (as a dict)
+    """
+    ch_case = chtype.casefold()
+    if ch_case in ('lorenz', 'rossler', 'duffing', 'chua', 'rikitake'):
+        return args[ch_case]
+    return {}
+
+
+# #####################################################################
 # Input parameters
 # #####################################################################
 
-CHTYPE = 'Lorenz'       # Lorenz, Rossler, Rikitake, Nose-Hoover, etc.
-NW = 5000               # Number of ODE's dots
-dt = 100                # Step for equations
+CHTYPE = 'Wang'       # Chaotic system name
+CHARGS = {
+    'rikitake': {'a': 1, 'mu': 1},
+    'duffing': {'a': 0.1, 'b': 11},
+    'rossler': {'a': 0.2, 'b': 0.2, 'c': 5.7},
+    'lorenz': {'sigma': 10, 'beta': 8/3, 'rho': 28},
+    'chua': {'alpha': 0.1, 'beta': 28, 'mu0': -1.143, 'mu1': -0.714}
+    }                   # Set arguments
 
+NW = 5000               # Number of ODE's dots
+DT = 100                # Step for equations
 NFFT = 2**12            # Number of FFT dots
 
-# Create zero arrays for coordinates
-xt = np.zeros(NW)
-yt = np.zeros(NW)
-zt = np.zeros(NW)
-
-# Set initial values for [X, Y, Z]
-xt[0], yt[0], zt[0] = 1.0, 0.5, 1.0
-
-# Set system parameters: Lorenz, Rossler, Rikitake
-
-CHUA_ARGS = {'alpha': 0.1, 'beta': 28, 'mu0': -1.143, 'mu1': -0.714}
-LORENZ_ARGS = {'sigma': 10, 'beta': 8/3, 'rho': 28}
-ROSSLER_ARGS = {'a': 0.2, 'b': 0.2, 'c': 5.7}
-DUFFING_ARGS = {'a': 0.1, 'b': 11}
-RIKITAKE_ARGS = {'a': 1, 'mu': 1}
 
 # #####################################################################
 # Calculate attractor
 # #####################################################################
+def calc_chaos():
+    print('Start analyzing the next chaotic system: [%s]\n' % CHTYPE)
 
-print('Start analyzing the next chaotic system: [%s]\n' % CHTYPE)
-for i in range(NW-1):
-    ch_type = CHTYPE.casefold()
-    if ch_type == 'wang':
-        x_next, y_next, z_next = wang(xt[i], yt[i], zt[i])
-    elif ch_type == 'nose-hoover':
-        x_next, y_next, z_next = nose_hoover(xt[i], yt[i], zt[i])
-    elif ch_type == 'lotka':
-        x_next, y_next, z_next = lotka_volterra(xt[i], yt[i], zt[i])
-    elif ch_type == 'chua':
-        x_next, y_next, z_next = chua(xt[i], yt[i], zt[i], **CHUA_ARGS)
-    elif ch_type == 'lorenz':
-        x_next, y_next, z_next = lorenz(xt[i], yt[i], zt[i], **LORENZ_ARGS)
-    elif ch_type == 'rossler':
-        x_next, y_next, z_next = rossler(xt[i], yt[i], zt[i], **ROSSLER_ARGS)
-    elif ch_type == 'duffing':
-        x_next, y_next, z_next = duffing(xt[i], yt[i], zt[i], **DUFFING_ARGS)
-    elif ch_type == 'rikitake':
-        x_next, y_next, z_next = rikitake(xt[i], yt[i], zt[i], **RIKITAKE_ARGS)
-    else:
-        raise Exception('Error: you should set the correct chaotic system')
+    # Create zero arrays for coordinates
+    xt, yt, zt = np.zeros(NW), np.zeros(NW), np.zeros(NW)
+    # Set initial values for [X, Y, Z]
+    xt[0], yt[0], zt[0] = 1.0, 0.5, 1.0
 
-    xt[i+1] = xt[i] + (x_next / dt)
-    yt[i+1] = yt[i] + (y_next / dt)
-    zt[i+1] = zt[i] + (z_next / dt)
+    for ii in range(NW-1):
+        x_nt, y_nt, z_nt = sel_chaos(chtype=CHTYPE,
+                                     xt=xt[ii], yt=yt[ii], zt=zt[ii],
+                                     **sel_args(CHTYPE, CHARGS)
+                                     )
+        xt[ii+1] = xt[ii] + (x_nt / DT)
+        yt[ii+1] = yt[ii] + (y_nt / DT)
+        zt[ii+1] = zt[ii] + (z_nt / DT)
 
-# #####################################################################
-# Calculate standardized moments
-# #####################################################################
+    # #####################################################################
+    # Calculate standardized moments
+    # #####################################################################
 
-D3 = ['X', 'Y', 'Z']
-ch_3d = np.stack((xt, yt, zt))
+    ds_3d = ('X', 'Y', 'Z')
+    ch_3d = np.stack((xt, yt, zt))
 
-Nn, Mm = ch_3d.shape[0], ch_3d.shape[1]
-print('Calculate mean, variance, skewness, kurtosis and median for each '
-      'coordinate of chaotic system:')
+    nn, mm = ch_3d.shape[0], ch_3d.shape[1]
+    print('Calculate mean, variance, skewness, kurtosis and median for each '
+          'coordinate of chaotic system:')
 
-M15 = np.zeros([Nn, Mm])
-for i in range(Nn):
-    M15[i, 0] = np.mean(ch_3d[i, :])      # Mean
-    M15[i, 1] = np.var(ch_3d[i, :])       # Variance
-    M15[i, 2] = skew(ch_3d[i, :])         # Skewness
-    M15[i, 3] = kurtosis(ch_3d[i, :])     # Kurtosis
-    M15[i, 4] = np.median(ch_3d[i, :])    # Median
+    m15 = np.zeros([nn, mm])
+    for ii in range(nn):
+        m15[ii, 0] = np.mean(ch_3d[ii, :])      # Mean
+        m15[ii, 1] = np.var(ch_3d[ii, :])       # Variance
+        m15[ii, 2] = skew(ch_3d[ii, :])         # Skewness
+        m15[ii, 3] = kurtosis(ch_3d[ii, :])     # Kurtosis
+        m15[ii, 4] = np.median(ch_3d[ii, :])    # Median
 
-    print('%s axis: ' % D3[i], end='')
-    print('M[t]:  {:+.4f},  '.format(M15[i, 0]), end='')
-    print('D[t]:  {:+.4f},  '.format(M15[i, 1]), end='')
-    print('A[t]:  {:+.4f},  '.format(M15[i, 2]), end='')
-    print('E[t]:  {:+.4f},  '.format(M15[i, 3]), end='')
-    print('Md[t]: {:+.4f}.  '.format(M15[i, 4]))
+        print('%s axis: ' % ds_3d[ii], end='')
+        print('M[t]:  {:+.4f},  '.format(m15[ii, 0]), end='')
+        print('D[t]:  {:+.4f},  '.format(m15[ii, 1]), end='')
+        print('A[t]:  {:+.4f},  '.format(m15[ii, 2]), end='')
+        print('E[t]:  {:+.4f},  '.format(m15[ii, 3]), end='')
+        print('Md[t]: {:+.4f}.  '.format(m15[ii, 4]))
 
-# Find Probability density function
-N = 1000
-p_axi = np.zeros([Nn, N])
-d_kde = np.zeros([Nn, N])
-for i in range(Nn):
-    p_axi[i] = np.linspace(ch_3d[i, :].min(), ch_3d[i, :].max(), N)
-    d_kde[i] = gaussian_kde(ch_3d[i, :]).evaluate(p_axi[i, :])
-    d_kde[i] /= d_kde[i].max()
+    # Find Probability density function
+    n_pdf = 3000
+    p_axi = np.zeros([nn, n_pdf])
+    d_kde = np.zeros([nn, n_pdf])
+    for ii in range(nn):
+        p_axi[ii] = np.linspace(ch_3d[ii, :].min(), ch_3d[ii, :].max(), n_pdf)
+        d_kde[ii] = gaussian_kde(ch_3d[ii, :]).evaluate(p_axi[ii, :])
+        d_kde[ii] /= d_kde[ii].max()
 
-# #####################################################################
-# Calculate Autocorrelation (Cross-correlation) and FFT
-# #####################################################################
+    # #####################################################################
+    # Calculate Autocorrelation (Cross-correlation) and FFT
+    # #####################################################################
 
-# TODO implement FFT and autocorrelation
-d_acf = np.zeros([Nn, Mm])
-d_fft = np.zeros([Nn, NFFT], dtype=np.complex)
-for i in range(Nn):
-    d_acf[i] = np.correlate(ch_3d[i, :], ch_3d[i, :], 'same')
-    d_acf[i] /= d_acf[i].max()
-    d_fft[i] = fft(ch_3d[i, 1:NFFT], NFFT)
+    # TODO implement FFT and autocorrelation
+    d_acf = np.zeros([nn, mm])
+    d_fft = np.zeros([nn, NFFT], dtype=np.complex)
+    for ii in range(nn):
+        d_acf[ii] = np.correlate(ch_3d[ii, :], ch_3d[ii, :], 'same')
+        d_acf[ii] /= d_acf[ii].max()
+        d_fft[ii] = fft(ch_3d[ii, 1:NFFT], NFFT)
 
-d_fft = np.abs(fftshift(d_fft, axes=1))
-d_fft /= np.max(d_fft)
-d_fft = 20*np.log10(d_fft)
+    d_fft = np.abs(fftshift(d_fft, axes=1))
+    d_fft /= np.max(d_fft)
+    d_fft = 20*np.log10(d_fft)
 
-# Plot 2D coordinates in time axis
-fig5 = plt.figure('Coordinates evolution in time')
-for i in range(Nn):
-    plt.subplot(2, 3, i+1)
-    plt.plot(d_acf[i], linewidth=0.75)
-    plt.grid()
-    plt.subplot(2, 3, i+1+3)
-    plt.plot(d_fft[i], linewidth=0.75)
-    plt.grid()
-plt.tight_layout()
-plt.show()
+    plt.rc('font', size=8)              # controls default text sizes
+    plt.rc('axes', titlesize=10)        # fontsize of the axes title
+    plt.rc('axes', labelsize=10)        # fontsize of the x and y labels
+    plt.rc('legend', fontsize=8)        # legend fontsize
 
-# #####################################################################
-# Plot results
-# #####################################################################
-
-if 0:
-    SMALL_SIZE = 8
-    MEDIUM_SIZE = 10
-    BIGGER_SIZE = 16
-
-    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-    plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
-    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-
-    minmax_x = [np.min(xt), np.max(xt)]
-    minmax_y = [np.min(yt), np.max(yt)]
-    minmax_z = [np.min(zt), np.max(zt)]
+    lim_xyz = [(np.min(ch_3d[ii]), np.max(ch_3d[ii])) for ii in range(3)]
 
     # Plot 3D model
-    fig1 = plt.figure('3D model of chaotic system')
-
-    ax = fig1.gca(projection='3d')
-    ax.plot(xt, yt, zt, 'o-', linewidth=0.1, markersize=0.3)
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
-    ax.set_xlim(minmax_x)
-    ax.set_ylim(minmax_y)
-    ax.set_zlim(minmax_z)
-    ax.set_title("3D Chaotic Attractor")
-    plt.tight_layout()
+    # fig1 = plt.figure('3D model of chaotic system')
+    # ax = fig1.gca(projection='3d')
+    # ax.plot(xt, yt, zt, 'o-', linewidth=0.1, markersize=0.3)
+    # ax.set_xlabel("X")
+    # ax.set_ylabel("Y")
+    # ax.set_zlabel("Z")
+    # ax.set_xlim(lim_xyz[0])
+    # ax.set_ylim(lim_xyz[1])
+    # ax.set_zlim(lim_xyz[2])
+    # ax.set_title("3D Chaotic Attractor")
+    # plt.tight_layout()
 
     # Plot 2D coordinates of 3D model
-    fig2 = plt.figure('2D Coordinates')
+    fig2 = plt.figure('3D Coordinates')
     plt.subplot(2, 2, 1)
     plt.plot(yt, xt, linewidth=0.75)
     plt.grid()
     plt.xlabel('X')
     plt.ylabel('Y')
-    plt.xlim(minmax_y)
-    plt.ylim(minmax_x)
+    plt.xlim(lim_xyz[1])
+    plt.ylim(lim_xyz[0])
 
     plt.subplot(2, 2, 2)
     plt.plot(yt, zt, linewidth=0.75)
     plt.grid()
     plt.xlabel('Z')
     plt.ylabel('Y')
-    plt.xlim(minmax_y)
-    plt.ylim(minmax_z)
+    plt.xlim(lim_xyz[1])
+    plt.ylim(lim_xyz[2])
 
     plt.subplot(2, 2, 3)
     plt.plot(zt, xt, linewidth=0.75)
     plt.grid()
     plt.xlabel('X')
     plt.ylabel('Z')
-    plt.xlim(minmax_z)
-    plt.ylim(minmax_x)
+    plt.xlim(lim_xyz[2])
+    plt.ylim(lim_xyz[0])
 
     ax = fig2.add_subplot(2, 2, 4, projection='3d')
     ax.plot(xt, yt, zt, linewidth=0.7)
@@ -422,61 +437,38 @@ if 0:
     ax.set_zlabel("Z")
     plt.tight_layout()
 
-    # Plot 2D coordinates in time axis
-    fig3 = plt.figure('Coordinates evolution in time')
-    plt.subplot(2, 2, 1)
-    plt.plot(xt, linewidth=0.75)
-    plt.grid()
-    plt.ylabel('X')
-    plt.xlim([0, NW-1])
-    plt.ylim(minmax_x)
-
-    plt.subplot(2, 2, 2)
-    plt.plot(yt, linewidth=0.75)
-    plt.grid()
-    plt.ylabel('Y')
-
-    plt.xlim([0, NW-1])
-    plt.ylim(minmax_y)
-
-    plt.subplot(2, 2, 3)
-    plt.plot(zt, linewidth=0.75)
-    plt.grid()
-    plt.ylabel('Z')
-    plt.xlim([0, NW-1])
-    plt.ylim(minmax_z)
+    # Plot 2D data in timex
+    plt.figure('Coordinates evolution in time')
+    for ii in range(nn):
+        plt.subplot(2, 2, ii+1)
+        plt.plot(ch_3d[ii], linewidth=0.75)
+        plt.grid()
+        plt.ylabel(ds_3d[ii])
+        plt.xlim([0, NW-1])
+        plt.ylim(lim_xyz[ii])
     plt.tight_layout()
 
     # Plot Probability density function
-    fig4 = plt.figure('Probability density function')
-    for i in range(Nn):
-        plt.plot(d_kde[i], '.')
-    plt.xlim([0, N-1])
-    plt.grid()
+    plt.figure('Probability density function')
+    for ii in range(nn):
+        plt.plot(d_kde[ii], '.')
+        plt.xlim([0, n_pdf-1])
+        plt.grid()
     plt.tight_layout()
 
-    # Plot 2D coordinates in time axis
-    fig5 = plt.figure('Coordinates evolution in time')
-    plt.subplot(2, 2, 1)
-    plt.plot(xt, linewidth=0.75)
-    plt.grid()
-    plt.ylabel('X')
-    plt.xlim([0, NW-1])
-    plt.ylim(minmax_x)
-
-    plt.subplot(2, 2, 2)
-    plt.plot(yt, linewidth=0.75)
-    plt.grid()
-    plt.ylabel('Y')
-
-    plt.xlim([0, NW-1])
-    plt.ylim(minmax_y)
-
-    plt.subplot(2, 2, 3)
-    plt.plot(zt, linewidth=0.75)
-    plt.grid()
-    plt.ylabel('Z')
-    plt.xlim([0, NW-1])
-    plt.ylim(minmax_z)
+    # Plot Autocorrelation and Spectrum
+    plt.figure('Autocorrelation and Spectrum')
+    for ii in range(nn):
+        plt.subplot(2, 3, ii+1)
+        plt.plot(d_acf[ii], linewidth=0.75)
+        plt.grid()
+        plt.subplot(2, 3, ii+1+3)
+        plt.plot(d_fft[ii], linewidth=0.75)
+        plt.grid()
     plt.tight_layout()
+
     plt.show()
+
+
+# Execute main function: Chaotic system
+calc_chaos()
