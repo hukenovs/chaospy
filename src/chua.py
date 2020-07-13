@@ -88,6 +88,7 @@ def chua(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
     y_out = x - y + z
     z_out = -beta * y
     # Eq. 2:
+    # TODO: 2020/07/13: Fix alternate method!
     if alternate is not None:
         x_out = 0.3 * y + x - x ** 3
         y_out = x + z
