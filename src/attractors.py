@@ -221,22 +221,19 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
-import numpy as np
-from scipy.stats import kurtosis, skew, gaussian_kde
-from scipy.fftpack import fft, fftshift
-from scipy.signal import correlate
-
 import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.mplot3d import axes3d  # noqa # pylint: disable=unused-import
-
+from scipy.fftpack import fft, fftshift
+from scipy.stats import gaussian_kde, kurtosis, skew
 from src.chua import chua
-from src.wang import wang
-from src.lorenz import lorenz
-from src.rossler import rossler
 from src.duffing import duffing
-from src.rikitake import rikitake
-from src.nose_hoover import nose_hoover
+from src.lorenz import lorenz
 from src.lotka_volterra import lotka_volterra
+from src.nose_hoover import nose_hoover
+from src.rikitake import rikitake
+from src.rossler import rossler
+from src.wang import wang
 
 # #####################################################################
 # Functions
@@ -258,24 +255,24 @@ def sel_chaos(chtype=None, xt=0, yt=0, zt=0, **kwargs):
 
     """
     ch_case = chtype.casefold()
-    if ch_case == 'wang':
+    if ch_case == "wang":
         return wang(xt, yt, zt)
-    elif ch_case == 'nose-hoover':
+    elif ch_case == "nose-hoover":
         return nose_hoover(xt, yt, zt)
-    elif ch_case == 'lotka':
+    elif ch_case == "lotka":
         return lotka_volterra(xt, yt, zt)
-    elif ch_case == 'chua':
+    elif ch_case == "chua":
         return chua(xt, yt, zt, **kwargs)
-    elif ch_case == 'lorenz':
+    elif ch_case == "lorenz":
         return lorenz(xt, yt, zt, **kwargs)
-    elif ch_case == 'rossler':
+    elif ch_case == "rossler":
         return rossler(xt, yt, zt, **kwargs)
-    elif ch_case == 'duffing':
+    elif ch_case == "duffing":
         return duffing(xt, yt, zt, **kwargs)
-    elif ch_case == 'rikitake':
+    elif ch_case == "rikitake":
         return rikitake(xt, yt, zt, **kwargs)
     else:
-        raise Exception('Error: you should set the correct chaotic system')
+        raise Exception("Error: you should set the correct chaotic system")
 
 
 def sel_args(chtype=None, args=None):
@@ -290,7 +287,7 @@ def sel_args(chtype=None, args=None):
         Chaotic system arguments (as a dict)
     """
     ch_case = chtype.casefold()
-    if ch_case in ('lorenz', 'rossler', 'duffing', 'chua', 'rikitake'):
+    if ch_case in ("lorenz", "rossler", "duffing", "chua", "rikitake"):
         return args[ch_case]
     return {}
 
@@ -299,65 +296,61 @@ def sel_args(chtype=None, args=None):
 # Input parameters
 # #####################################################################
 
-CHTYPE = 'Wang'       # Chaotic system name
+CHTYPE = "Wang"  # Chaotic system name
 CHARGS = {
-    'rikitake': {'a': 1, 'mu': 1},
-    'duffing': {'a': 0.1, 'b': 11},
-    'rossler': {'a': 0.2, 'b': 0.2, 'c': 5.7},
-    'lorenz': {'sigma': 10, 'beta': 8/3, 'rho': 28},
-    'chua': {'alpha': 0.1, 'beta': 28, 'mu0': -1.143, 'mu1': -0.714}
-    }                   # Set arguments
+    "rikitake": {"a": 1, "mu": 1},
+    "duffing": {"a": 0.1, "b": 11},
+    "rossler": {"a": 0.2, "b": 0.2, "c": 5.7},
+    "lorenz": {"sigma": 10, "beta": 8 / 3, "rho": 28},
+    "chua": {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714},
+}  # Set arguments
 
-NW = 5000               # Number of ODE's dots
-DT = 100                # Step for equations
-NFFT = 2**12            # Number of FFT dots
+NW = 5000  # Number of ODE's dots
+DT = 100  # Step for equations
+NFFT = 2 ** 12  # Number of FFT dots
 
 
 # #####################################################################
 # Calculate attractor
 # #####################################################################
 def calc_chaos():
-    print('Start analyzing the next chaotic system: [%s]\n' % CHTYPE)
+    print("Start analyzing the next chaotic system: [%s]\n" % CHTYPE)
 
     # Create zero arrays for coordinates
     xt, yt, zt = np.zeros(NW), np.zeros(NW), np.zeros(NW)
     # Set initial values for [X, Y, Z]
     xt[0], yt[0], zt[0] = 1.0, 0.5, 1.0
 
-    for ii in range(NW-1):
-        x_nt, y_nt, z_nt = sel_chaos(chtype=CHTYPE,
-                                     xt=xt[ii], yt=yt[ii], zt=zt[ii],
-                                     **sel_args(CHTYPE, CHARGS)
-                                     )
-        xt[ii+1] = xt[ii] + (x_nt / DT)
-        yt[ii+1] = yt[ii] + (y_nt / DT)
-        zt[ii+1] = zt[ii] + (z_nt / DT)
+    for ii in range(NW - 1):
+        x_nt, y_nt, z_nt = sel_chaos(chtype=CHTYPE, xt=xt[ii], yt=yt[ii], zt=zt[ii], **sel_args(CHTYPE, CHARGS),)
+        xt[ii + 1] = xt[ii] + (x_nt / DT)
+        yt[ii + 1] = yt[ii] + (y_nt / DT)
+        zt[ii + 1] = zt[ii] + (z_nt / DT)
 
     # #####################################################################
     # Calculate standardized moments
     # #####################################################################
 
-    ds_3d = ('X', 'Y', 'Z')
+    ds_3d = ("X", "Y", "Z")
     ch_3d = np.stack((xt, yt, zt))
 
     nn, mm = ch_3d.shape[0], ch_3d.shape[1]
-    print('Calculate mean, variance, skewness, kurtosis and median for each '
-          'coordinate of chaotic system:')
+    print("Calculate mean, variance, skewness, kurtosis and median for each " "coordinate of chaotic system:")
 
     m15 = np.zeros([nn, mm])
     for ii in range(nn):
-        m15[ii, 0] = np.mean(ch_3d[ii, :])      # Mean
-        m15[ii, 1] = np.var(ch_3d[ii, :])       # Variance
-        m15[ii, 2] = skew(ch_3d[ii, :])         # Skewness
-        m15[ii, 3] = kurtosis(ch_3d[ii, :])     # Kurtosis
-        m15[ii, 4] = np.median(ch_3d[ii, :])    # Median
+        m15[ii, 0] = np.mean(ch_3d[ii, :])  # Mean
+        m15[ii, 1] = np.var(ch_3d[ii, :])  # Variance
+        m15[ii, 2] = skew(ch_3d[ii, :])  # Skewness
+        m15[ii, 3] = kurtosis(ch_3d[ii, :])  # Kurtosis
+        m15[ii, 4] = np.median(ch_3d[ii, :])  # Median
 
-        print('%s axis: ' % ds_3d[ii], end='')
-        print('M[t]:  {:+.4f},  '.format(m15[ii, 0]), end='')
-        print('D[t]:  {:+.4f},  '.format(m15[ii, 1]), end='')
-        print('A[t]:  {:+.4f},  '.format(m15[ii, 2]), end='')
-        print('E[t]:  {:+.4f},  '.format(m15[ii, 3]), end='')
-        print('Md[t]: {:+.4f}.  '.format(m15[ii, 4]))
+        print("%s axis: " % ds_3d[ii], end="")
+        print("M[t]:  {:+.4f},  ".format(m15[ii, 0]), end="")
+        print("D[t]:  {:+.4f},  ".format(m15[ii, 1]), end="")
+        print("A[t]:  {:+.4f},  ".format(m15[ii, 2]), end="")
+        print("E[t]:  {:+.4f},  ".format(m15[ii, 3]), end="")
+        print("Md[t]: {:+.4f}.  ".format(m15[ii, 4]))
 
     # Find Probability density function
     n_pdf = 3000
@@ -376,18 +369,18 @@ def calc_chaos():
     d_acf = np.zeros([nn, mm])
     d_fft = np.zeros([nn, NFFT], dtype=np.complex)
     for ii in range(nn):
-        d_acf[ii] = np.correlate(ch_3d[ii, :], ch_3d[ii, :], 'same')
+        d_acf[ii] = np.correlate(ch_3d[ii, :], ch_3d[ii, :], "same")
         d_acf[ii] /= d_acf[ii].max()
         d_fft[ii] = fft(ch_3d[ii, 1:NFFT], NFFT)
 
     d_fft = np.abs(fftshift(d_fft, axes=1))
     d_fft /= np.max(d_fft)
-    d_fft = 20*np.log10(d_fft)
+    d_fft = 20 * np.log10(d_fft)
 
-    plt.rc('font', size=8)              # controls default text sizes
-    plt.rc('axes', titlesize=10)        # fontsize of the axes title
-    plt.rc('axes', labelsize=10)        # fontsize of the x and y labels
-    plt.rc('legend', fontsize=8)        # legend fontsize
+    plt.rc("font", size=8)  # controls default text sizes
+    plt.rc("axes", titlesize=10)  # fontsize of the axes title
+    plt.rc("axes", labelsize=10)  # fontsize of the x and y labels
+    plt.rc("legend", fontsize=8)  # legend fontsize
 
     lim_xyz = [(np.min(ch_3d[ii]), np.max(ch_3d[ii])) for ii in range(3)]
 
@@ -405,32 +398,32 @@ def calc_chaos():
     # plt.tight_layout()
 
     # Plot 2D coordinates of 3D model
-    fig2 = plt.figure('3D Coordinates')
+    fig2 = plt.figure("3D Coordinates")
     plt.subplot(2, 2, 1)
     plt.plot(yt, xt, linewidth=0.75)
     plt.grid()
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    plt.xlabel("X")
+    plt.ylabel("Y")
     plt.xlim(lim_xyz[1])
     plt.ylim(lim_xyz[0])
 
     plt.subplot(2, 2, 2)
     plt.plot(yt, zt, linewidth=0.75)
     plt.grid()
-    plt.xlabel('Z')
-    plt.ylabel('Y')
+    plt.xlabel("Z")
+    plt.ylabel("Y")
     plt.xlim(lim_xyz[1])
     plt.ylim(lim_xyz[2])
 
     plt.subplot(2, 2, 3)
     plt.plot(zt, xt, linewidth=0.75)
     plt.grid()
-    plt.xlabel('X')
-    plt.ylabel('Z')
+    plt.xlabel("X")
+    plt.ylabel("Z")
     plt.xlim(lim_xyz[2])
     plt.ylim(lim_xyz[0])
 
-    ax = fig2.add_subplot(2, 2, 4, projection='3d')
+    ax = fig2.add_subplot(2, 2, 4, projection="3d")
     ax.plot(xt, yt, zt, linewidth=0.7)
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
@@ -438,31 +431,31 @@ def calc_chaos():
     plt.tight_layout()
 
     # Plot 2D data in timex
-    plt.figure('Coordinates evolution in time')
+    plt.figure("Coordinates evolution in time")
     for ii in range(nn):
-        plt.subplot(2, 2, ii+1)
+        plt.subplot(2, 2, ii + 1)
         plt.plot(ch_3d[ii], linewidth=0.75)
         plt.grid()
         plt.ylabel(ds_3d[ii])
-        plt.xlim([0, NW-1])
+        plt.xlim([0, NW - 1])
         plt.ylim(lim_xyz[ii])
     plt.tight_layout()
 
     # Plot Probability density function
-    plt.figure('Probability density function')
+    plt.figure("Probability density function")
     for ii in range(nn):
-        plt.plot(d_kde[ii], '.')
-        plt.xlim([0, n_pdf-1])
+        plt.plot(d_kde[ii], ".")
+        plt.xlim([0, n_pdf - 1])
         plt.grid()
     plt.tight_layout()
 
     # Plot Autocorrelation and Spectrum
-    plt.figure('Autocorrelation and Spectrum')
+    plt.figure("Autocorrelation and Spectrum")
     for ii in range(nn):
-        plt.subplot(2, 3, ii+1)
+        plt.subplot(2, 3, ii + 1)
         plt.plot(d_acf[ii], linewidth=0.75)
         plt.grid()
-        plt.subplot(2, 3, ii+1+3)
+        plt.subplot(2, 3, ii + 1 + 3)
         plt.plot(d_fft[ii], linewidth=0.75)
         plt.grid()
     plt.tight_layout()

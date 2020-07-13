@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : rossler.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/30
-
-------------------------------------------------------------------------
+"""Rossler attractor (see 'Strange attractors' book).
 
 Description   :
     Rossler attractor is the attractor for the Rössler system. Rossler
@@ -87,23 +77,32 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/31
+# License       : GNU GENERAL PUBLIC LICENSE
 
-def rossler(x=0, y=0, z=0, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Rossler system
+from typing import Tuple
+
+
+def rossler(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
+    """Calculate the next coordinate X, Y, Z for 3rd-order Rossler system
 
     Parameters
     ----------
     x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
+        Input coordinates X, Y, Z respectively
+    kwargs : dict
         a, b and c - are Rossler system parameters
 
     """
+
     # Default Rossler parameters:
-    a = kwargs.get('a', 0.2)
-    b = kwargs.get('b', 0.2)
-    c = kwargs.get('c', 5.7)
+    a = kwargs.get("a", 0.2)
+    b = kwargs.get("b", 0.2)
+    c = kwargs.get("c", 5.7)
 
     # Next step coordinates:
     x_out = -(y + z)

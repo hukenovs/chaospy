@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : wang.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/31
-
-------------------------------------------------------------------------
+"""Wang 3D attractor system. It also has 4D realization.
 
 Description   :
     Wang system (improved Lorenz model) as classic chaotic attractor
@@ -46,18 +36,27 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/31
+# License       : GNU GENERAL PUBLIC LICENSE
 
-def wang(x=0, y=0, z=0):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Wang Attractor
+from typing import Tuple
+
+
+def wang(x: int = 0, y: int = 0, z: int = 1) -> Tuple[int, int, int]:
+    """Calculate the next coordinate X, Y, Z for 3rd-order Wang Attractor
 
     Parameters
     ----------
     x, y, z : float
         Input coordinates Z, Y, Z respectively
     """
+
     # Next step coordinates:
-    x_out = x - y*z
-    y_out = x - y + x*z
-    z_out = -3*z + x*y
+    x_out = x - y * z
+    y_out = x - y + x * z
+    z_out = -3 * z + x * y
     return x_out, y_out, z_out

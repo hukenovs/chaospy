@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : duffing.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/31
-
-------------------------------------------------------------------------
+"""Duffing map.
 
 Description   :
     Duffing map. It is a discrete-time dynamical system (2nd order)
@@ -56,12 +46,21 @@ OR CORRECTION.
 
 ------------------------------------------------------------------------
 """
-import numpy as np
+
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/31
+# License       : GNU GENERAL PUBLIC LICENSE
+
+from math import cos
+from typing import Tuple
 
 
-def duffing(x=0, y=0, z=0, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for Duffing map.
+def duffing(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
+    """Calculate the next coordinate X, Y, Z for Duffing map.
+
     It is 2nd order attractor (Z coordinate = 1)
 
     Duffing map:
@@ -80,19 +79,21 @@ def duffing(x=0, y=0, z=0, **kwargs):
     Parameters
     ----------
     x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
+        Input coordinates X, Y, Z respectively
+    kwargs : dict
         a and b - are Duffing system parameters
     """
+
     # Default parameters:
-    # a = kwargs.get('a', 2.75)
-    # b = kwargs.get('b', 0.2)
-    a = kwargs.get('a', 0.1)
-    b = kwargs.get('b', 11)
+    a = kwargs.get("a", 0.1)
+    b = kwargs.get("b", 11)
+    alternate = kwargs.get("alternate", None)
 
     # Next step coordinates:
     x_out = y
-    y_out = -a*y - x**3 + b*np.cos(z)
-    # y_out = a*y - y**3 - b*x
+    y_out = -a * y - x ** 3 + b * cos(z)
+    if alternate is not None:
+        y_out = a * y - y ** 3 - b * x
     z_out = 1
+
     return x_out, y_out, z_out
