@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : rikitake.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/30
-
-------------------------------------------------------------------------
+"""Rikitake chaotic system.
 
 Description   :
     Rikitake system is ordinary differential equation (ODE) of
@@ -52,22 +42,30 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/30
+# License       : GNU GENERAL PUBLIC LICENSE
 
-def rikitake(x=0, y=0, z=0, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Rikitake system
+from typing import Tuple
+
+
+def rikitake(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
+    """Calculate the next coordinate X, Y, Z for 3rd-order Rikitake system
 
     Parameters
     ----------
     x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
+        Input coordinates X, Y, Z respectively
+    kwargs : dict
         mu, a - are Rikitake system parameters
 
     """
     # Default Rikitake parameters:
-    a = kwargs.get('a', 5)
-    mu = kwargs.get('mu', 2)
+    a = kwargs.get("a", 5)
+    mu = kwargs.get("mu", 2)
 
     # Next step coordinates:
     x_out = -mu * x + z * y

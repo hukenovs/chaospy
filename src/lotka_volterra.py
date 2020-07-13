@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : lotka_volterra.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/31
-
-------------------------------------------------------------------------
+"""Lottka Volterra attractor.
 
 Description   :
     The Lotka–Volterra equations, also known as the predator–prey
@@ -56,18 +46,28 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/31
+# License       : GNU GENERAL PUBLIC LICENSE
 
-def lotka_volterra(x=0, y=0, z=0):
-    """
-    Calculate the next coordinate X, Y, Z for Lotka–Volterra
+from typing import Tuple
+
+
+def lotka_volterra(x: int = 0, y: int = 0, z: int = 1) -> Tuple[int, int, int]:
+    """Calculate the next coordinate X, Y, Z for Lotka–Volterra
 
     Parameters
     ----------
     x, y, z : float
-        Input coordinates Z, Y, Z respectively
+        Input coordinates X, Y, Z respectively
     """
+
     # Next step coordinates:
-    x_out = x*(1 - x - 9*y)
-    y_out = -y*(1 - 6*x - y + 9*z)
-    z_out = z*(1 - 3*x - z)
+    x_out = x * (1 - x - 9 * y)
+    y_out = -y * (1 - 6 * x - y + 9 * z)
+    z_out = z * (1 - 3 * x - z)
+
     return x_out, y_out, z_out

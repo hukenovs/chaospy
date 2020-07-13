@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : lorenz.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/30
-
-------------------------------------------------------------------------
+"""Lorenz Attractor
 
 Description   :
     Lorenz attractor is ordinary differential equation (ODE) of
@@ -54,27 +44,36 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/31
+# License       : GNU GENERAL PUBLIC LICENSE
 
-def lorenz(x=0, y=0, z=0, **kwargs):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
+from typing import Tuple
+
+
+def lorenz(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
+    """Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
 
     Parameters
     ----------
     x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    kwargs : float
-        beta, rho and sigma - are Lorenz system parameters
+        Input coordinates X, Y, Z respectively
+    kwargs : dict
+        beta, rho and sigma - are floating point Lorenz system parameters
 
     """
+
     # Default Lorenz parameters:
-    sigma = kwargs.get('sigma', 10)
-    beta = kwargs.get('beta', 8/3)
-    rho = kwargs.get('rho', 28)
+    sigma = kwargs.get("sigma", 10)
+    beta = kwargs.get("beta", 8 / 3)
+    rho = kwargs.get("rho", 28)
 
     # Next step coordinates:
     x_out = sigma * (y - x)
-    y_out = rho*x - y - x*z
-    z_out = x*y - beta*z
+    y_out = rho * x - y - x * z
+    z_out = x * y - beta * z
 
     return x_out, y_out, z_out

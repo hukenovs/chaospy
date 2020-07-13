@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : nose_hoover.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/30
-
-------------------------------------------------------------------------
+"""Nose-Hoover attractor system.
 
 Description   :
     Nose–Hoover oscillator is ordinary differential equation (ODE) of
@@ -51,16 +41,25 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/31
+# License       : GNU GENERAL PUBLIC LICENSE
 
-def nose_hoover(x=0, y=0, z=0):
-    """
-    Calculate the next coordinate X, Y, Z for 3rd-order Nose-Hoover
+from typing import Tuple
+
+
+def nose_hoover(x: int = 0, y: int = 0, z: int = 1) -> Tuple[int, int, int]:
+    """Calculate the next coordinate X, Y, Z for 3rd-order Nose-Hoover
 
     Parameters
     ----------
     x, y, z : float
-        Input coordinates Z, Y, Z respectively
+        Input coordinates X, Y, Z respectively
     """
+
     # Next step coordinates:
     x_out = y
     y_out = y * z - x
