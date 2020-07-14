@@ -51,7 +51,7 @@ OR CORRECTION.
 from typing import Tuple
 
 
-def nose_hoover(x: int = 0, y: int = 0, z: int = 1) -> Tuple[int, int, int]:
+def nose_hoover(x: float = 0, y: float = 0, z: float = 1) -> Tuple[float, float, float]:
     """Calculate the next coordinate X, Y, Z for 3rd-order Nose-Hoover
 
     Parameters

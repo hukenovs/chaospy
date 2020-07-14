@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : attractors.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/30
-
-------------------------------------------------------------------------
+"""Chaotic attractors.
 
 Description   : This is the main module which collects attractors
                 together. You can choose: Lorenz, Rossler, Rikitake,
@@ -221,6 +211,15 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
+
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/31
+# License       : GNU GENERAL PUBLIC LICENSE
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import axes3d  # noqa # pylint: disable=unused-import
@@ -238,6 +237,8 @@ from src.attractors.wang import wang
 # #####################################################################
 # Functions
 # #####################################################################
+
+# TODO: Reimplement this file! 2020/07/14
 
 
 def sel_chaos(chtype=None, xt=0, yt=0, zt=0, **kwargs):

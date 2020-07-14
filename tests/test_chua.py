@@ -1,31 +1,11 @@
+"""Testing for Chua system.
+"""
+
 import pytest
 from src.attractors.chua import chua
+from tests.utils.useful import calc_absolute_error
 
-
-def calc_absolute_error(test: tuple = None, pred: tuple = None) -> float:
-    """Calculate absolute error for test checking.
-
-    Parameters
-    ----------
-    test : tuple
-        coordinates array of theoretical values.
-    pred : tuple
-        coordinates array of calculated values.
-
-    Returns
-    -------
-    err: float
-        Absolute error: sum[(Xi - Yi) / Xi] / 3.
-
-    """
-    err_sum = 0
-    for e1, e2 in zip(test, pred):
-        div = e2 if e1 == 0 else e1
-        try:
-            err_sum += (e1 - e2)**2 / div**2
-        except ZeroDivisionError:
-            pass
-    return err_sum / 3
+ERROR_THRESHOLD = 10e-10
 
 
 test_coordinates_with_defaults = [
@@ -46,7 +26,7 @@ def test_chua_with_default_kwargs(inputs, outputs):
     xo, yo, zo = chua(xi, yi, zi)
 
     err_sum = calc_absolute_error(test=(xo, yo, zo), pred=outputs)
-    assert err_sum < 1e-10, f"Outputs: {xo, yo, zo}, Error: {err_sum :.3f}"
+    assert err_sum < ERROR_THRESHOLD, f"Outputs: {xo, yo, zo}, Error: {err_sum :.3f}"
 
 
 test_coordinates_with_kwargs = [
@@ -65,4 +45,10 @@ def test_chua_with_kwargs(inputs, outputs, kwargs):
     xo, yo, zo = chua(xi, yi, zi, **kwargs)
 
     err_sum = calc_absolute_error(test=(xo, yo, zo), pred=outputs)
-    assert err_sum < 1e-8, f"Outputs: {xo, yo, zo}, Error: {err_sum :.3f}"
+    assert err_sum < ERROR_THRESHOLD, f"Outputs: {xo, yo, zo}, Error: {err_sum :.3f}"
+
+
+def test_output_length():
+    outputs = chua()
+    assert len(outputs) == 3, "Should return 3 values as a tuple"
+

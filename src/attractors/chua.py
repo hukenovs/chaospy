@@ -63,7 +63,7 @@ from math import fabs
 from typing import Tuple
 
 
-def chua(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
+def chua(x: float = 0, y: float = 0, z: float = 1, **kwargs) -> Tuple[float, float, float]:
     """Calculate the next coordinate X, Y, Z for Chua system.
 
     Parameters

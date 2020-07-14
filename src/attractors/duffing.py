@@ -58,7 +58,7 @@ from math import cos
 from typing import Tuple
 
 
-def duffing(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
+def duffing(x: float = 0, y: float = 0, z: float = 1, **kwargs) -> Tuple[float, float, float]:
     """Calculate the next coordinate X, Y, Z for Duffing map.
 
     It is 2nd order attractor (Z coordinate = 1)
