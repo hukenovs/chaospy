@@ -1,20 +1,22 @@
-"""Lorenz Attractor
+"""Lottka Volterra attractor.
 
 Description   :
-    Lorenz attractor is ordinary differential equation (ODE) of
-    3rd order system.
-    In 1963, E. Lorenz developed a simplified mathematical model for
-    atmospheric convection.
+    The Lotka–Volterra equations, also known as the predator–prey
+    equations.
 
-    Lorenz equations are:
-        dx/dt = sigma * (y - x)
-        dy/dt = rho * x - y - x * z
-        dz/dt = x * y - beta * z
+    Chaotic Lotka-Volterra model require a careful tuning of
+    parameters and are even less likely to exhibit chaos as the number
+    of species increases.
 
-    where beta, rho and sigma - are Lorenz system parameters. Default
-    values are: beta = 8/3, rho = 28 and sigma = 10.
+    Lotka–Volterra equations are:
+    Eq. 1:
+        dx/dt = x * (1 - x - 9*y)
+        dy/dt = -y * (1 - 6*x - y + 9*z)
+        dz/dt = z * (1 - 3*x - z)
 
-    Wiki: If rho < 1 then there is only one equilibrium point.
+    Be careful! Init parameters of x, y, z should be set right.
+
+    For example, [x, y, z] = [0.6; 0.2; 0.01]
 
 ------------------------------------------------------------------------
 
@@ -54,26 +56,18 @@ OR CORRECTION.
 from typing import Tuple
 
 
-def lorenz(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
-    """Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
+def lotka_volterra(x: float = 0, y: float = 0, z: float = 1) -> Tuple[float, float, float]:
+    """Calculate the next coordinate X, Y, Z for Lotka–Volterra
 
     Parameters
     ----------
     x, y, z : float
         Input coordinates X, Y, Z respectively
-    kwargs : dict
-        beta, rho and sigma - are floating point Lorenz system parameters
-
     """
 
-    # Default Lorenz parameters:
-    sigma = kwargs.get("sigma", 10)
-    beta = kwargs.get("beta", 8 / 3)
-    rho = kwargs.get("rho", 28)
-
     # Next step coordinates:
-    x_out = sigma * (y - x)
-    y_out = rho * x - y - x * z
-    z_out = x * y - beta * z
+    x_out = x * (1 - x - 9 * y)
+    y_out = -y * (1 - 6 * x - y + 9 * z)
+    z_out = z * (1 - 3 * x - z)
 
     return x_out, y_out, z_out

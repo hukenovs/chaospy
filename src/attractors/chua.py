@@ -1,22 +1,28 @@
-"""Lottka Volterra attractor.
+"""Chua attractor
 
 Description   :
-    The Lotka–Volterra equations, also known as the predator–prey
-    equations.
+    Chua circuit. This is a simple electronic circuit that exhibits
+    classic chaotic behavior.
 
-    Chaotic Lotka-Volterra model require a careful tuning of
-    parameters and are even less likely to exhibit chaos as the number
-    of species increases.
-
-    Lotka–Volterra equations are:
+    Chua equations are:
     Eq. 1:
-        dx/dt = x * (1 - x - 9*y)
-        dy/dt = -y * (1 - 6*x - y + 9*z)
-        dz/dt = z * (1 - 3*x - z)
+        dx/dt = alpha * (y - x - ht)
+        dy/dt = x - y + z
+        dz/dt = -beta * y
 
-    Be careful! Init parameters of x, y, z should be set right.
+    where ht = mu1*x + 0.5*(mu0 - mu1)*(np.abs(x + 1) - np.abs(x - 1))
+    and alpha, beta, mu0 and mu1 - are Chua system parameters.
 
-    For example, [x, y, z] = [0.6; 0.2; 0.01]
+    Default values are:
+    alpha = 15.6
+    beta = 28
+    mu0 = -1.143
+    mu1 = -0.714
+
+    Eq. 2:
+        dx/dt = 0.3*y + x - x**3
+        dy/dt = x + z
+        dz/dt = y
 
 ------------------------------------------------------------------------
 
@@ -53,21 +59,39 @@ OR CORRECTION.
 # Release Date  : 2019/05/31
 # License       : GNU GENERAL PUBLIC LICENSE
 
+from math import fabs
 from typing import Tuple
 
 
-def lotka_volterra(x: int = 0, y: int = 0, z: int = 1) -> Tuple[int, int, int]:
-    """Calculate the next coordinate X, Y, Z for Lotka–Volterra
+def chua(x: float = 0, y: float = 0, z: float = 1, **kwargs) -> Tuple[float, float, float]:
+    """Calculate the next coordinate X, Y, Z for Chua system.
 
     Parameters
     ----------
     x, y, z : float
         Input coordinates X, Y, Z respectively
+    kwargs : dict
+        alpha, beta, mu0, mu1 - are Chua system parameters
     """
 
+    # Default parameters:
+    alpha = kwargs.get("alpha", 15.6)
+    beta = kwargs.get("beta", 28)
+    mu0 = kwargs.get("mu0", -1.143)
+    mu1 = kwargs.get("mu1", -0.714)
+    alternate = kwargs.get("alternate", None)
+
+    ht = mu1 * x + 0.5 * (mu0 - mu1) * (fabs(x + 1) - fabs(x - 1))
     # Next step coordinates:
-    x_out = x * (1 - x - 9 * y)
-    y_out = -y * (1 - 6 * x - y + 9 * z)
-    z_out = z * (1 - 3 * x - z)
+    # Eq. 1:
+    x_out = alpha * (y - x - ht)
+    y_out = x - y + z
+    z_out = -beta * y
+    # Eq. 2:
+    # TODO: 2020/07/13: Fix alternate method!
+    if alternate is not None:
+        x_out = 0.3 * y + x - x ** 3
+        y_out = x + z
+        z_out = y
 
     return x_out, y_out, z_out

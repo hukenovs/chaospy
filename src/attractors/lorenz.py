@@ -1,17 +1,20 @@
-"""Nose-Hoover attractor system.
+"""Lorenz Attractor
 
 Description   :
-    Nose–Hoover oscillator is ordinary differential equation (ODE) of
+    Lorenz attractor is ordinary differential equation (ODE) of
     3rd order system.
-    Nose–Hoover system has only five terms and two quadratic
-    nonlinearities.
+    In 1963, E. Lorenz developed a simplified mathematical model for
+    atmospheric convection.
 
-    Nose–Hoover equations are:
-        dx/dt = y
-        dy/dt = y * z - x
-        dz/dt = 1 - y * y
+    Lorenz equations are:
+        dx/dt = sigma * (y - x)
+        dy/dt = rho * x - y - x * z
+        dz/dt = x * y - beta * z
 
-    Nose–Hoover system doesn't have any system parameters.
+    where beta, rho and sigma - are Lorenz system parameters. Default
+    values are: beta = 8/3, rho = 28 and sigma = 10.
+
+    Wiki: If rho < 1 then there is only one equilibrium point.
 
 ------------------------------------------------------------------------
 
@@ -51,18 +54,26 @@ OR CORRECTION.
 from typing import Tuple
 
 
-def nose_hoover(x: int = 0, y: int = 0, z: int = 1) -> Tuple[int, int, int]:
-    """Calculate the next coordinate X, Y, Z for 3rd-order Nose-Hoover
+def lorenz(x: float = 0, y: float = 0, z: float = 1, **kwargs) -> Tuple[float, float, float]:
+    """Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
 
     Parameters
     ----------
     x, y, z : float
         Input coordinates X, Y, Z respectively
+    kwargs : dict
+        beta, rho and sigma - are floating point Lorenz system parameters
+
     """
 
+    # Default Lorenz parameters:
+    sigma = kwargs.get("sigma", 10)
+    beta = kwargs.get("beta", 8 / 3)
+    rho = kwargs.get("rho", 28)
+
     # Next step coordinates:
-    x_out = y
-    y_out = y * z - x
-    z_out = 1 - y * y
+    x_out = sigma * (y - x)
+    y_out = rho * x - y - x * z
+    z_out = x * y - beta * z
 
     return x_out, y_out, z_out

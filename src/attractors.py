@@ -1,14 +1,4 @@
-"""
-------------------------------------------------------------------------
-
-Title         : attractors.py
-Author        : Alexander Kapitanov
-E-mail        : sallador@bk.ru
-Lang.         : python
-Company       :
-Release Date  : 2019/05/30
-
-------------------------------------------------------------------------
+"""Chaotic attractors.
 
 Description   : This is the main module which collects attractors
                 together. You can choose: Lorenz, Rossler, Rikitake,
@@ -221,23 +211,34 @@ OR CORRECTION.
 ------------------------------------------------------------------------
 """
 
+
+# Authors       : Alexander Kapitanov
+# ...
+# Contacts      : <empty>
+# ...
+# Release Date  : 2019/05/31
+# License       : GNU GENERAL PUBLIC LICENSE
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import axes3d  # noqa # pylint: disable=unused-import
 from scipy.fftpack import fft, fftshift
 from scipy.stats import gaussian_kde, kurtosis, skew
-from src.chua import chua
-from src.duffing import duffing
-from src.lorenz import lorenz
-from src.lotka_volterra import lotka_volterra
-from src.nose_hoover import nose_hoover
-from src.rikitake import rikitake
-from src.rossler import rossler
-from src.wang import wang
+from src.attractors.chua import chua
+from src.attractors.duffing import duffing
+from src.attractors.lorenz import lorenz
+from src.attractors.lotka_volterra import lotka_volterra
+from src.attractors.nose_hoover import nose_hoover
+from src.attractors.rikitake import rikitake
+from src.attractors.rossler import rossler
+from src.attractors.wang import wang
 
 # #####################################################################
 # Functions
 # #####################################################################
+
+# TODO: Reimplement this file! 2020/07/14
 
 
 def sel_chaos(chtype=None, xt=0, yt=0, zt=0, **kwargs):

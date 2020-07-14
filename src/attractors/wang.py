@@ -1,23 +1,12 @@
-"""Duffing map.
+"""Wang 3D attractor system. It also has 4D realization.
 
 Description   :
-    Duffing map. It is a discrete-time dynamical system (2nd order)
-    The map depends on the two constants: a and b.
-    Z coordinate is a linear function.
+    Wang system (improved Lorenz model) as classic chaotic attractor
 
-    Duffing equations are:
-    Eq. 1:
-        dx/dt = y
-        dy/dt = -a*y - x**3 + b * cos(z)
-        dz/dt = 1
-    where a = 0.1 and b = 11 (default parameters)
-
-    Eq. 2:
-        dx/dt = y
-        dy/dt = a*y - y**3 - b*x
-        dz/dt = 1
-    where a = 2.75 and b = 0.2 (default parameters)
-
+    Wang equations are:
+        dx/dt = x - y*z
+        dy/dt = x - y + x*z
+        dz/dt = -3*z + x*y
 
 ------------------------------------------------------------------------
 
@@ -54,46 +43,20 @@ OR CORRECTION.
 # Release Date  : 2019/05/31
 # License       : GNU GENERAL PUBLIC LICENSE
 
-from math import cos
 from typing import Tuple
 
 
-def duffing(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
-    """Calculate the next coordinate X, Y, Z for Duffing map.
-
-    It is 2nd order attractor (Z coordinate = 1)
-
-    Duffing map:
-    Eq. 1:
-        dx/dt = y
-        dy/dt = -a*y - x**3 + b * cos(z)
-        dz/dt = 1
-    where a = 0.1 and b = 11 (default parameters)
-
-    Eq. 2:
-        dx/dt = y
-        dy/dt = a*y - y**3 - b*x
-        dz/dt = 1
-    where a = 2.75 and b = 0.2 (default parameters)
+def wang(x: float = 0, y: float = 0, z: float = 1) -> Tuple[float, float, float]:
+    """Calculate the next coordinate X, Y, Z for 3rd-order Wang Attractor
 
     Parameters
     ----------
     x, y, z : float
-        Input coordinates X, Y, Z respectively
-    kwargs : dict
-        a and b - are Duffing system parameters
+        Input coordinates Z, Y, Z respectively
     """
 
-    # Default parameters:
-    a = kwargs.get("a", 0.1)
-    b = kwargs.get("b", 11)
-    alternate = kwargs.get("alternate", None)
-
     # Next step coordinates:
-    x_out = y
-    y_out = -a * y - x ** 3 + b * cos(z)
-    if alternate is not None:
-        y_out = a * y - y ** 3 - b * x
-    z_out = 1
-
+    x_out = x - y * z
+    y_out = x - y + x * z
+    z_out = -3 * z + x * y
     return x_out, y_out, z_out

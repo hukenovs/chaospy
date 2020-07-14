@@ -52,7 +52,7 @@ OR CORRECTION.
 from typing import Tuple
 
 
-def rikitake(x: int = 0, y: int = 0, z: int = 1, **kwargs) -> Tuple[int, int, int]:
+def rikitake(x: float = 0, y: float = 0, z: float = 1, **kwargs) -> Tuple[float, float, float]:
     """Calculate the next coordinate X, Y, Z for 3rd-order Rikitake system
 
     Parameters
