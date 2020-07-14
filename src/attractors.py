@@ -226,14 +226,14 @@ import numpy as np
 from mpl_toolkits.mplot3d import axes3d  # noqa # pylint: disable=unused-import
 from scipy.fftpack import fft, fftshift
 from scipy.stats import gaussian_kde, kurtosis, skew
-from src.chua import chua
-from src.duffing import duffing
-from src.lorenz import lorenz
-from src.lotka_volterra import lotka_volterra
-from src.nose_hoover import nose_hoover
-from src.rikitake import rikitake
-from src.rossler import rossler
-from src.wang import wang
+from src.attractors.chua import chua
+from src.attractors.duffing import duffing
+from src.attractors.lorenz import lorenz
+from src.attractors.lotka_volterra import lotka_volterra
+from src.attractors.nose_hoover import nose_hoover
+from src.attractors.rikitake import rikitake
+from src.attractors.rossler import rossler
+from src.attractors.wang import wang
 
 # #####################################################################
 # Functions

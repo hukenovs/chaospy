@@ -1,5 +1,5 @@
 import pytest
-from src.chua import chua
+from src.attractors.chua import chua
 
 
 def calc_absolute_error(test: tuple = None, pred: tuple = None) -> float:
