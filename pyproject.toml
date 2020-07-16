@@ -13,7 +13,7 @@ max-complexity = 12
 select = ['B','C','E','F','W','T4','B9']
 
 [tool.isort]
-known_third_party = ["matplotlib", "mpl_toolkits", "numpy", "scipy", "src"]
+known_third_party = ["matplotlib", "mpl_toolkits", "numpy", "pytest", "scipy", "src"]
 multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0

@@ -37,7 +37,7 @@ def calc_absolute_error():
         for e1, e2 in zip(test, pred):
             div = e2 if e1 == 0 else e1
             try:
-                err_sum += (e1 - e2)**2 / div**2
+                err_sum += (e1 - e2) ** 2 / div ** 2
             except ZeroDivisionError:
                 pass
         return err_sum / 3

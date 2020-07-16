@@ -1,7 +1,8 @@
 """Main attractor
 
 Description   :
-    Attractor base class. It implements abstract method (Chua, Lorenz, Duffing system).
+    Attractor base class.
+    It implements abstract method (Chua, Lorenz, Duffing system).
     Can check some parameters for each chaotic system.
 
 ------------------------------------------------------------------------
@@ -39,10 +40,11 @@ OR CORRECTION.
 # Release Date  : 2020/07/16
 # License       : GNU GENERAL PUBLIC LICENSE
 
+from abc import abstractmethod
+from typing import Tuple
+
 import numpy as np
 from scipy.stats import kurtosis, skew
-from typing import Tuple
-from abc import abstractmethod
 
 
 class BaseAttractor:
@@ -51,13 +53,14 @@ class BaseAttractor:
     Warning: Do not use this class directly. Use derived classes instead.
 
     """
+
     def __init__(
-            self,
-            num_points: int,
-            init_point: Tuple[float, float, float] = (0, 0, 0),
-            step: int = 1,
-            nfft: int = 1024,
-            **kwargs
+        self,
+        num_points: int,
+        init_point: Tuple[float, float, float] = (0, 0, 0),
+        step: int = 1,
+        nfft: int = 1024,
+        **kwargs,
     ):
         self.num_points = num_points
         self.init_point = init_point
@@ -111,14 +114,16 @@ class BaseAttractor:
         """Calculate stochastic parameters: mean, variance, skewness, kurtosis etc.
 
         """
-        return {"Mean": np.mean(coorditanes, axis=0),
-                "Variance": np.var(coorditanes, axis=0),
-                "Skewness": skew(coorditanes, axis=0),
-                "Kurtosis": kurtosis(coorditanes, axis=0),
-                "Median": np.median(coorditanes, axis=0)}
+        return {
+            "Mean": np.mean(coorditanes, axis=0),
+            "Variance": np.var(coorditanes, axis=0),
+            "Skewness": skew(coorditanes, axis=0),
+            "Kurtosis": kurtosis(coorditanes, axis=0),
+            "Median": np.median(coorditanes, axis=0),
+        }
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     chaotic_attractor = BaseAttractor(num_points=10, init_point=(1, 2, 3), step=10, nfft=1024)
     print(f"Start analyzing {chaotic_attractor.__class__.__name__} chaotic system: \n")
     chaotic_attractor.process_in_time()
