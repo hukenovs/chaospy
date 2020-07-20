@@ -62,36 +62,41 @@ OR CORRECTION.
 from math import fabs
 from typing import Tuple
 
+from src.attractors.attractor import BaseAttractor
 
-def chua(x: float = 0, y: float = 0, z: float = 1, **kwargs) -> Tuple[float, float, float]:
-    """Calculate the next coordinate X, Y, Z for Chua system.
 
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates X, Y, Z respectively
-    kwargs : dict
-        alpha, beta, mu0, mu1 - are Chua system parameters
+class Chua(BaseAttractor):
+    """Chua attractor.
+
     """
 
-    # Default parameters:
-    alpha = kwargs.get("alpha", 15.6)
-    beta = kwargs.get("beta", 28)
-    mu0 = kwargs.get("mu0", -1.143)
-    mu1 = kwargs.get("mu1", -0.714)
-    alternate = kwargs.get("alternate", None)
+    def attractor(self, x: float, y: float, z: float, **kwargs) -> Tuple[float, float, float]:
+        """Calculate the next coordinate X, Y, Z for Chua system.
 
-    ht = mu1 * x + 0.5 * (mu0 - mu1) * (fabs(x + 1) - fabs(x - 1))
-    # Next step coordinates:
-    # Eq. 1:
-    x_out = alpha * (y - x - ht)
-    y_out = x - y + z
-    z_out = -beta * y
-    # Eq. 2:
-    # TODO: 2020/07/13: Fix alternate method!
-    if alternate is not None:
-        x_out = 0.3 * y + x - x ** 3
-        y_out = x + z
-        z_out = y
+        Parameters
+        ----------
+        x, y, z : float
+            Input coordinates X, Y, Z respectively
 
-    return x_out, y_out, z_out
+        kwargs : dict
+            alpha, beta, mu0, mu1 - are Chua system parameters
+        """
+
+        alpha = self.kwargs.get("alpha")
+        beta = self.kwargs.get("beta")
+        mu0 = self.kwargs.get("mu0")
+        mu1 = self.kwargs.get("mu1")
+
+        ht = mu1 * x + 0.5 * (mu0 - mu1) * (fabs(x + 1) - fabs(x - 1))
+        # Next step coordinates:
+        # Eq. 1:
+        x_out = alpha * (y - x - ht)
+        y_out = x - y + z
+        z_out = -beta * y
+        return x_out, y_out, z_out
+
+
+if __name__ == "__main__":
+    chua_defaults = {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714}
+    chua = Chua(num_points=2 ** 10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128, **chua_defaults)
+    chua()

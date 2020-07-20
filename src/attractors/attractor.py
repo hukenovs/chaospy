@@ -64,12 +64,7 @@ class BaseAttractor:
     """
 
     def __init__(
-        self,
-        num_points: int,
-        init_point: Tuple[float, float, float] = (0, 0, 0),
-        step: int = 1,
-        nfft: int = 1024,
-        **kwargs,
+        self, num_points: int, init_point: Tuple[float, float, float], step: int = 1, nfft: int = 1024, **kwargs,
     ):
         self.num_points = num_points
         self.init_point = init_point
@@ -78,8 +73,33 @@ class BaseAttractor:
         self.kwargs = kwargs
         self.coordinates = None
 
+    def __len__(self):
+        if self.coordinates is not None:
+            return len(self.coordinates)
+        raise TypeError("[FAIL]: Initialize coordinates for chaotic attractor!")
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        coordinates = self.init_point
+        for _ in range(self.num_points):
+            yield coordinates
+            next_coordinates = self.attractor(*coordinates, **self.kwargs)
+            coordinates = tuple(prev + curr / self.step for prev, curr in zip(coordinates, next_coordinates))
+
+    # def __next__(self):
+    #     if self.coordinates is None:
+    #         self.coordinates = self.init_point
+    #         return self.coordinates
+    #
+    #     next_coordinates = self.attractor(*self.coordinates, **self.kwargs)
+    #     self.coordinates = tuple(prev + curr / self.step for prev, curr in zip(self.coordinates,
+    #     next_coordinates))
+    #     return self.coordinates
+
     @abstractmethod
-    def attractor(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
+    def attractor(self, x: float, y: float, z: float, **kwargs) -> Tuple[float, float, float]:
         """Calculate the next coordinate X, Y, Z for chaotic system.
 
         Parameters
@@ -99,18 +119,11 @@ class BaseAttractor:
         """Reset coordinates to zeros: X, Y, Z = 0"""
         self.coordinates = None
 
-    def _step_coordinates(self, coordinates: Tuple[float, float, float]):
-        """Make generator for coordinates.
-        """
-        for i in range(self.num_points):
-            yield coordinates
-            next_coordinates = self.attractor(*coordinates, **self.kwargs)
-            coordinates = tuple(prev + curr / self.step for prev, curr in zip(coordinates, next_coordinates))
-
     def process_in_time(self):
         """Collect coordinates from time with time step and initial point.
         """
-        self.coordinates = np.array(list(self._step_coordinates(self.init_point)), dtype=float)
+        # self.coordinates =  np.array([self.__next__() for _ in range(self.num_points)])
+        self.coordinates = np.array(list(next(self)))
 
     @staticmethod
     def check_min_max(coordinates: np.array) -> Tuple[float, float]:
@@ -150,16 +163,27 @@ class BaseAttractor:
             plt.savefig(f"{self.__class__.__name__}_coordinates.png")
         plt.show()
 
+    def __call__(self, save_plots: bool = False):
+        # Collect coordinates
+        self.process_in_time()
+        _xyz = self.coordinates
+        print("\n[INFO]: Calculate mean, variance, skewness, kurtosis and median for chaotic system:")
+        _moments = self.check_moments(_xyz)
+        for _key in _moments:
+            print(f"{_key:<10}: {_moments[_key]}")
+        self.show_time_plots(save_plots=save_plots)
+
 
 if __name__ == "__main__":
-    chaotic_attractor = BaseAttractor(num_points=100, init_point=(0.1, 0.2, -0.1), step=10, nfft=1024)
-    print(f"Start analyzing {chaotic_attractor.__class__.__name__} chaotic system: \n")
+    chaotic_attractor = BaseAttractor(num_points=10, init_point=(1, 5, -0.1), step=100, nfft=1024)
+    print(f"\n[INFO]: Start analyzing {chaotic_attractor.__class__.__name__} chaotic system: \n")
     chaotic_attractor.process_in_time()
-    xyz = chaotic_attractor.coordinates
-    print("Calculate mean, variance, skewness, kurtosis and median for each " "coordinate of chaotic system:")
+    print(chaotic_attractor.coordinates)
 
+    xyz = chaotic_attractor.coordinates
+    print("\n[INFO]: Calculate mean, variance, skewness, kurtosis and median for each " "coordinate of chaotic system:")
     moments = chaotic_attractor.check_moments(xyz)
     for key in moments:
         print(f"{key:<10}: {moments[key]}")
 
-    chaotic_attractor.show_time_plots(save_plots=False)
+    # chaotic_attractor.show_time_plots(save_plots=False)
