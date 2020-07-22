@@ -2,7 +2,14 @@
 """
 
 import pytest
-from src.attractors.chua import chua
+from src.attractors.chua import Chua
+
+
+# TODO: Fixture "cell" called directly. Fixtures are not meant to be called directly,
+@pytest.fixture(scope="module")
+def model(x, y, z):
+    chua = Chua(num_points=100, init_point=(0, 0, 0))
+    return chua.attractor(x, y, z)
 
 
 @pytest.mark.parametrize(
@@ -20,7 +27,7 @@ from src.attractors.chua import chua
 )
 def test_chua_with_default_kwargs(inputs, outputs, assert_threshold):
     xi, yi, zi = inputs
-    xo, yo, zo = chua(xi, yi, zi)
+    xo, yo, zo = model(xi, yi, zi)
 
     assert_threshold((xo, yo, zo), outputs)
 
@@ -38,11 +45,11 @@ def test_chua_with_default_kwargs(inputs, outputs, assert_threshold):
 )
 def test_chua_with_kwargs(inputs, outputs, kwargs, assert_threshold):
     xi, yi, zi = inputs
-    xo, yo, zo = chua(xi, yi, zi, **kwargs)
+    xo, yo, zo = model(xi, yi, zi, **kwargs)
 
     assert_threshold((xo, yo, zo), outputs)
 
 
 def test_output_length():
-    outputs = chua()
+    outputs = model(0, 0, 0)
     assert len(outputs) == 3, "Should return 3 values as a tuple"

@@ -70,7 +70,16 @@ class Chua(BaseAttractor):
 
     """
 
-    def attractor(self, x: float, y: float, z: float, **kwargs) -> Tuple[float, float, float]:
+    def attractor(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        alpha: float = 15.6,
+        beta: float = 28,
+        mu0: float = -1.143,
+        mu1: float = -0.714,
+    ) -> Tuple[float, float, float]:
         """Calculate the next coordinate X, Y, Z for Chua system.
 
         Parameters
@@ -78,14 +87,9 @@ class Chua(BaseAttractor):
         x, y, z : float
             Input coordinates X, Y, Z respectively
 
-        kwargs : dict
-            alpha, beta, mu0, mu1 - are Chua system parameters
+        alpha, beta, mu0, mu1 : float
+            Chua initial parameters
         """
-
-        alpha = self.kwargs.get("alpha")
-        beta = self.kwargs.get("beta")
-        mu0 = self.kwargs.get("mu0")
-        mu1 = self.kwargs.get("mu1")
 
         ht = mu1 * x + 0.5 * (mu0 - mu1) * (fabs(x + 1) - fabs(x - 1))
         # Next step coordinates:
@@ -97,6 +101,6 @@ class Chua(BaseAttractor):
 
 
 if __name__ == "__main__":
-    chua_defaults = {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714}
-    chua = Chua(num_points=2 ** 10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128, **chua_defaults)
+    # chua_defaults = {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714}
+    chua = Chua(num_points=2 ** 10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
     chua()

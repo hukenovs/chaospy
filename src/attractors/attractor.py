@@ -63,14 +63,11 @@ class BaseAttractor:
 
     """
 
-    def __init__(
-        self, num_points: int, init_point: Tuple[float, float, float], step: int = 1, nfft: int = 1024, **kwargs,
-    ):
+    def __init__(self, num_points: int, init_point: Tuple[float, float, float], step: int = 1, nfft: int = 1024):
         self.num_points = num_points
         self.init_point = init_point
         self.step = step
         self.nfft = nfft
-        self.kwargs = kwargs
         self.coordinates = None
 
     def __len__(self):
@@ -85,7 +82,7 @@ class BaseAttractor:
         coordinates = self.init_point
         for _ in range(self.num_points):
             yield coordinates
-            next_coordinates = self.attractor(*coordinates, **self.kwargs)
+            next_coordinates = self.attractor(*coordinates)
             coordinates = tuple(prev + curr / self.step for prev, curr in zip(coordinates, next_coordinates))
 
     # def __next__(self):
