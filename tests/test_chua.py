@@ -5,11 +5,10 @@ import pytest
 from src.attractors.chua import Chua
 
 
-# TODO: Fixture "cell" called directly. Fixtures are not meant to be called directly,
 @pytest.fixture(scope="module")
-def model(x, y, z):
-    chua = Chua(num_points=100, init_point=(0, 0, 0))
-    return chua.attractor(x, y, z)
+def model():
+    chua = Chua(num_points=100)
+    return chua.attractor
 
 
 @pytest.mark.parametrize(
@@ -25,7 +24,7 @@ def model(x, y, z):
         ((1000000, 2000000, 3000000), (26738406.6924, 2000000, -56000000)),
     ],
 )
-def test_chua_with_default_kwargs(inputs, outputs, assert_threshold):
+def test_chua_with_default_kwargs(model, inputs, outputs, assert_threshold):
     xi, yi, zi = inputs
     xo, yo, zo = model(xi, yi, zi)
 
@@ -35,21 +34,19 @@ def test_chua_with_default_kwargs(inputs, outputs, assert_threshold):
 @pytest.mark.parametrize(
     "inputs, outputs, kwargs",
     [
-        ((1, 2, 3), (25.3, 2, -86), {"alpha": 11, "beta": 43, "mu0": -1.3, "mu1": -0.9, "alternate": None}),
-        ((1, 2, 3), (12.0, 2, -34), {"alpha": 4, "beta": 17, "mu0": -2, "mu1": -3, "alternate": None}),
-        ((1, 2, 3), (0.0, 2.00001, 0), {"alpha": 0, "beta": 0, "mu0": 0, "mu1": 0, "alternate": None}),
-        ((1, 2, 3), (0.6, 4, 2), {"alpha": 11, "beta": 43, "mu0": -1.3, "mu1": -0.9, "alternate": True}),
-        # ((1, 2, 3), (0.6, 4, 2), {"alpha": 4, "beta": 17, "mu0": -2, "mu1": -3, "alternate": True}),
-        # ((1, 2, 3), (0.6, 4, 2), {"alpha": 15, "beta": 24, "mu0": 0, "mu1": 0, "alternate": True}),
+        ((1, 2, 3), (25.3, 2, -86), {"alpha": 11, "beta": 43, "mu0": -1.3, "mu1": -0.9}),
+        ((1, 2, 3), (12.0, 2, -34), {"alpha": 4, "beta": 17, "mu0": -2, "mu1": -3}),
+        ((1, 2, 3), (0.0, 2.00001, 0), {"alpha": 0, "beta": 0, "mu0": 0, "mu1": 0}),
+        ((-0.01, 0.2, 100), (2.167, 99.79, -8.6), {"alpha": 11, "beta": 43, "mu0": -1.3, "mu1": -0.9}),
     ],
 )
-def test_chua_with_kwargs(inputs, outputs, kwargs, assert_threshold):
+def test_chua_with_kwargs(model, inputs, outputs, kwargs, assert_threshold):
     xi, yi, zi = inputs
     xo, yo, zo = model(xi, yi, zi, **kwargs)
 
     assert_threshold((xo, yo, zo), outputs)
 
 
-def test_output_length():
+def test_output_length(model):
     outputs = model(0, 0, 0)
     assert len(outputs) == 3, "Should return 3 values as a tuple"

@@ -3,14 +3,14 @@ import pytest
 
 @pytest.fixture
 def error_threshold():
-    return 10e-10
+    return 10e-8
 
 
 @pytest.fixture
 def assert_threshold(error_threshold, calc_absolute_error):
     def wrapper(inputs, outputs):
         err_sum = calc_absolute_error(inputs, outputs)
-        assert err_sum < error_threshold, f"Outputs: {outputs}, Error: {err_sum :.3f}"
+        assert err_sum < error_threshold, f"Outputs: {outputs}, Error: {err_sum :.5f}"
 
     return wrapper
 

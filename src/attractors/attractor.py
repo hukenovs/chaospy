@@ -63,7 +63,13 @@ class BaseAttractor:
 
     """
 
-    def __init__(self, num_points: int, init_point: Tuple[float, float, float], step: int = 1, nfft: int = 1024):
+    def __init__(
+        self,
+        num_points: int,
+        init_point: Tuple[float, float, float] = (1e-4, 1e-4, 1e-4),
+        step: int = 1,
+        nfft: int = 1024,
+    ):
         self.num_points = num_points
         self.init_point = init_point
         self.step = step
@@ -73,7 +79,8 @@ class BaseAttractor:
     def __len__(self):
         if self.coordinates is not None:
             return len(self.coordinates)
-        raise TypeError("[FAIL]: Initialize coordinates for chaotic attractor!")
+        return 0
+        # raise TypeError("[FAIL]: Initialize coordinates for chaotic attractor!")
 
     def __iter__(self):
         return self
@@ -120,7 +127,8 @@ class BaseAttractor:
         """Collect coordinates from time with time step and initial point.
         """
         # self.coordinates =  np.array([self.__next__() for _ in range(self.num_points)])
-        self.coordinates = np.array(list(next(self)))
+        if self.coordinates is None:
+            self.coordinates = np.array(list(next(self)))
 
     @staticmethod
     def check_min_max(coordinates: np.array) -> Tuple[float, float]:
@@ -182,5 +190,3 @@ if __name__ == "__main__":
     moments = chaotic_attractor.check_moments(xyz)
     for key in moments:
         print(f"{key:<10}: {moments[key]}")
-
-    # chaotic_attractor.show_time_plots(save_plots=False)
