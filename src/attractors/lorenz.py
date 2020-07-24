@@ -1,8 +1,7 @@
 """Lorenz Attractor
 
-Description   :
-    Lorenz attractor is ordinary differential equation (ODE) of
-    3rd order system.
+Description:
+    Lorenz attractor is ordinary differential equation (ODE) of 3rd order system.
     In 1963, E. Lorenz developed a simplified mathematical model for
     atmospheric convection.
 
@@ -11,10 +10,15 @@ Description   :
         dy/dt = rho * x - y - x * z
         dz/dt = x * y - beta * z
 
-    where beta, rho and sigma - are Lorenz system parameters. Default
-    values are: beta = 8/3, rho = 28 and sigma = 10.
+    where:
+        beta, rho and sigma - are Lorenz system parameters. Default
+    default values for parameters are:
+        beta = 8/3,
+        rho = 28,
+        sigma = 10.
 
-    Wiki: If rho < 1 then there is only one equilibrium point.
+    If rho < 1  then there is only one equilibrium point,
+    which is at the origin. This point corresponds to no convection.
 
 ------------------------------------------------------------------------
 
@@ -53,27 +57,43 @@ OR CORRECTION.
 
 from typing import Tuple
 
+from src.attractors.attractor import BaseAttractor
 
-def lorenz(x: float = 0, y: float = 0, z: float = 1, **kwargs) -> Tuple[float, float, float]:
-    """Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
 
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates X, Y, Z respectively
-    kwargs : dict
-        beta, rho and sigma - are floating point Lorenz system parameters
+class Lorenz(BaseAttractor):
+    """Lorenz attractor."""
 
-    """
+    def attractor(
+        self, x: float, y: float, z: float, sigma: float = 10, beta: float = 8 / 3, rho: float = 28,
+    ) -> Tuple[float, float, float]:
+        """Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
 
-    # Default Lorenz parameters:
-    sigma = kwargs.get("sigma", 10)
-    beta = kwargs.get("beta", 8 / 3)
-    rho = kwargs.get("rho", 28)
+        Parameters
+        ----------
+        x, y, z : float
+            Input coordinates X, Y, Z respectively.
+        sigma, beta, rho : float
+            Lorenz system parameters. Default:
 
-    # Next step coordinates:
-    x_out = sigma * (y - x)
-    y_out = rho * x - y - x * z
-    z_out = x * y - beta * z
+        Examples
+        --------
+        >>> from src.attractors.lorenz import Lorenz
+        >>> coordinates = (0, 1, -1)
+        >>> chaotic_system = Lorenz(num_points=1)
+        >>> output = chaotic_system.attractor(*coordinates)
+        >>> print(output)
+        (10, -1, 2.6666666666666665)
 
-    return x_out, y_out, z_out
+        See Also
+        -----
+        https://en.wikipedia.org/wiki/Lorenz_system
+        """
+        x_out = sigma * (y - x)
+        y_out = rho * x - y - x * z
+        z_out = x * y - beta * z
+        return x_out, y_out, z_out
+
+
+if __name__ == "__main__":
+    lorenz = Lorenz(num_points=2 ** 10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
+    lorenz()

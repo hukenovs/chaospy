@@ -43,3 +43,29 @@ def calc_absolute_error():
         return err_sum / 3
 
     return wrapper
+
+
+# TODO: 2020/07/23: Fix this
+# @pytest.mark.parametrize(
+#     "num_points, initial_points, result",
+#     [
+#         (1, (0, 0, 0), None),
+#         (1, (0, 0, 0), None),
+#     ],
+# )
+# def assert_moments(num_points, initial_points, result):
+#     def wrapper(chaotic_system):
+#         chaos = chaotic_system(num_points, initial_points)
+#         moments = chaos.check_moments()
+#         assert result == moments, f"Outputs: {moments :5f}, Golden data: {result :.5f}"
+#         return wrapper
+
+
+@pytest.fixture
+def assert_moments(chaotic_system):
+    def wrapper(num_points, initial_points, result):
+        chaos = chaotic_system(num_points, initial_points)
+        moments = chaos.check_moments()
+        assert result == moments, f"Outputs: {moments}, Golden data: {result}"
+
+    return wrapper

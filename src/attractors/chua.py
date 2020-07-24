@@ -1,10 +1,12 @@
 """Chua attractor
 
-Description   :
+Description:
     Chua circuit. This is a simple electronic circuit that exhibits
-    classic chaotic behavior.
+    classic chaotic behavior. This means roughly that it is a
+    "nonperiodic oscillator".
 
     Chua equations are:
+
     Eq. 1:
         dx/dt = alpha * (y - x - ht)
         dy/dt = x - y + z
@@ -14,15 +16,17 @@ Description   :
     and alpha, beta, mu0 and mu1 - are Chua system parameters.
 
     Default values are:
-    alpha = 15.6
-    beta = 28
-    mu0 = -1.143
-    mu1 = -0.714
+        alpha = 15.6
+        beta = 28
+        mu0 = -1.143
+        mu1 = -0.714
 
     Eq. 2:
         dx/dt = 0.3*y + x - x**3
         dy/dt = x + z
         dz/dt = y
+
+    without default values.
 
 ------------------------------------------------------------------------
 
@@ -66,9 +70,7 @@ from src.attractors.attractor import BaseAttractor
 
 
 class Chua(BaseAttractor):
-    """Chua attractor.
-
-    """
+    """Chua attractor."""
 
     def attractor(
         self,
@@ -85,15 +87,31 @@ class Chua(BaseAttractor):
         Parameters
         ----------
         x, y, z : float
-            Input coordinates X, Y, Z respectively
+            Input coordinates X, Y, Z respectively.
 
         alpha, beta, mu0, mu1 : float
-            Chua initial parameters
+            Chua system parameters. Default:
+                - alpha = 15.6,
+                - beta = 28,
+                - mu0 = -1.143,
+                - mu1 = -0.714,
+
+        Examples
+        --------
+        >>> from src.attractors.chua import Chua
+        >>> coordinates = (0, 1, -1)
+        >>> chaotic_system = Chua(num_points=1)
+        >>> output = chaotic_system.attractor(*coordinates)
+        >>> print(output)
+        (15.6, -2, -28)
+
+        See Also
+        -----
+        https://en.wikipedia.org/wiki/Chua%27s_circuit
         """
 
         ht = mu1 * x + 0.5 * (mu0 - mu1) * (fabs(x + 1) - fabs(x - 1))
         # Next step coordinates:
-        # Eq. 1:
         x_out = alpha * (y - x - ht)
         y_out = x - y + z
         z_out = -beta * y

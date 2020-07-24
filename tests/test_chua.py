@@ -5,6 +5,11 @@ import pytest
 from src.attractors.chua import Chua
 
 
+@pytest.fixture
+def chaotic_system():
+    return Chua
+
+
 @pytest.fixture(scope="module")
 def model():
     chua = Chua(num_points=100)
