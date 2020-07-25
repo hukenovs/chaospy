@@ -44,8 +44,6 @@ from abc import abstractmethod
 from typing import Tuple
 
 import numpy as np
-from scipy.stats import kurtosis, skew
-from src.utils.drawer import PlotDrawer
 
 CHARGS = {
     "chua": {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714},
@@ -77,6 +75,11 @@ class BaseAttractor:
     nfft: int
         Number of points for Fast Fourier transform. Default: 1024.
 
+    Attributes
+    ----------
+    _coordinates : np.array
+        Numpy 3D array of coordinates for chaotic model. Has shape (num_points, 3).
+
     Examples
     --------
     >>> from src.attractors.attractor import BaseAttractor
@@ -93,12 +96,8 @@ class BaseAttractor:
      [ 0.19487171  3.8974342  -0.97435855]
      [ 0.21435888  4.28717762 -1.07179441]
      [ 0.23579477  4.71589538 -1.17897385]]
-    >>> model.check_moments(is_global=True)
-    Mean      : 0.84999
-    Variance  : 3.15038
-    Skewness  : 0.78675
-    Kurtosis  : -0.7909
-    Median    : 0.15373
+    >>> print(len(model))
+    10
 
     See Also:
     -----
@@ -115,7 +114,6 @@ class BaseAttractor:
         step: float = 1.0,
         nfft: int = 1024,
         show_log: bool = False,
-        save_plots: bool = False,
     ):
         if show_log:
             print(f"[INFO]: Initialize chaotic system: {self.__class__.__name__}")
@@ -123,11 +121,8 @@ class BaseAttractor:
         self.init_point = init_point
         self.step = step
         self.nfft = nfft
-        self.show_log = show_log
         # Internal attributes
         self._coordinates = None
-        # Plot drawer
-        self.drawer = PlotDrawer(self.__class__.__name__, self.coordinates, self.num_points, save_plots,)
 
     @property
     def coordinates(self):
@@ -135,9 +130,13 @@ class BaseAttractor:
             self._coordinates = np.array(list(next(self)))
         return self._coordinates
 
-    @coordinates.deleter
-    def coordinates(self):
-        self._coordinates = None
+    @coordinates.setter
+    def coordinates(self, value):
+        self._coordinates = value
+
+    # @coordinates.deleter
+    # def coordinates(self):
+    #     self._coordinates = None
 
     def __len__(self):
         return len(self.coordinates)
@@ -180,53 +179,19 @@ class BaseAttractor:
         # raise NotImplementedError
         return x, y, z
 
-    def check_min_max(self) -> Tuple[float, float]:
-        """Calculate minimum and maximum for X, Y, Z coordinates.
-        """
-        return np.min(self.coordinates, axis=0), np.max(self.coordinates, axis=0)
-
-    def check_moments(self, is_global: bool = False) -> dict:
-        """Calculate stochastic parameters: mean, variance, skewness, kurtosis etc.
-
-        Parameters
-        ----------
-        is_global : bool
-            If is_global is False: return moments for each coordinate. Otherwise
-            return moments over all ndarray. Similar for axis or axes along which the moments are computed.
-            The default is to compute the moments for each coordinate.
-
-        """
-        axis = None if is_global else 0
-        return {
-            "Mean": np.mean(self.coordinates, axis=axis),
-            "Variance": np.var(self.coordinates, axis=axis),
-            "Skewness": skew(self.coordinates, axis=axis),
-            "Kurtosis": kurtosis(self.coordinates, axis=axis),
-            "Median": np.median(self.coordinates, axis=axis),
-        }
-
-    def check_probability(self):
-        pass
-        # TODO: Implement this method!
-
-    def __call__(self, save_plots: bool = False):
-        if self.show_log:
-            print("\n[INFO]: Calculate mean, variance, skewness, kurtosis and median for chaotic system:")
-        _moments = self.check_moments()
-        for _key in _moments:
-            print(f"{_key:<10}: {_moments[_key]}")
-
-        if self.show_log:
-            print("\n[INFO]: Calculate moments:")
-        _global_moments = self.check_moments(is_global=True)
-        for _key in _global_moments:
-            print(f"{_key:<10}: {_global_moments[_key]}")
-
-        self.drawer.show_3d_plots()
+    def update_attributes(self, **kwargs):
+        """Update chaotic system parameters."""
+        for key in kwargs:
+            if key in self.__dict__ and not key.startswith("_"):
+                self.__dict__[key] = kwargs.get(key)
+                self.coordinates = None
 
 
 if __name__ == "__main__":
 
     model = BaseAttractor(num_points=10, init_point=(0.1, 2, -0.5), step=10, nfft=32)
+    print(model.__dict__)
     print(model.coordinates)
-    model()
+    model.update_attributes(num_points=5, step=100)
+    print(model.__dict__)
+    print(model.coordinates)

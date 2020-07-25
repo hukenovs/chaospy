@@ -96,4 +96,3 @@ class Lorenz(BaseAttractor):
 
 if __name__ == "__main__":
     lorenz = Lorenz(num_points=2 ** 10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
-    lorenz()

@@ -1,5 +1,4 @@
-"""Testing for Chua system.
-"""
+"""Testing for Chua system."""
 
 import pytest
 from src.attractors.chua import Chua
