@@ -100,10 +100,22 @@ class Chua(BaseAttractor):
         --------
         >>> from src.attractors.chua import Chua
         >>> coordinates = (0, 1, -1)
-        >>> chaotic_system = Chua(num_points=1)
-        >>> output = chaotic_system.attractor(*coordinates)
+        >>> model = Chua(num_points=1)
+        >>> output = model.attractor(*coordinates)
         >>> print(output)
         (15.6, -2, -28)
+        >>> model = Chua(num_points=10, init_point=(0.1, 0, -0.1), step=100)
+        >>> print(model.coordinates)
+        [[ 1.00000000e-01  0.00000000e+00 -1.00000000e-01]
+         [ 1.02230800e-01  0.00000000e+00 -1.00000000e-01]
+         [ 1.04511365e-01  2.23080000e-05 -1.00000000e-01]
+         [ 1.06846284e-01  6.71985669e-05 -1.00006246e-01]
+         [ 1.09240294e-01  1.34926961e-04 -1.00025062e-01]
+         [ 1.11698275e-01  2.25730015e-04 -1.00062841e-01]
+         [ 1.14225254e-01  3.39827053e-04 -1.00126046e-01]
+         [ 1.16826404e-01  4.77420867e-04 -1.00221197e-01]
+         [ 1.19507045e-01  6.38698727e-04 -1.00354875e-01]
+         [ 1.22272645e-01  8.23833441e-04 -1.00533711e-01]]
 
         See Also
         -----
@@ -120,5 +132,5 @@ class Chua(BaseAttractor):
 
 if __name__ == "__main__":
     # chua_defaults = {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714}
-    chua = Chua(num_points=2 ** 10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
-    chua()
+    chua = Chua(num_points=10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
+    print(chua.coordinates)

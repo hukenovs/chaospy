@@ -79,10 +79,22 @@ class Lorenz(BaseAttractor):
         --------
         >>> from src.attractors.lorenz import Lorenz
         >>> coordinates = (0, 1, -1)
-        >>> chaotic_system = Lorenz(num_points=1)
-        >>> output = chaotic_system.attractor(*coordinates)
+        >>> model = Lorenz(num_points=1)
+        >>> output = model.attractor(*coordinates)
         >>> print(output)
         (10, -1, 2.6666666666666665)
+        >>> model = Lorenz(num_points=10, init_point=(0.1, 0, -0.1), step=100)
+        >>> print(model.coordinates)
+        [[ 0.1         0.         -0.1       ]
+         [ 0.09        0.0281     -0.09733333]
+         [ 0.08381     0.0531066  -0.09471249]
+         [ 0.08073966  0.07612171 -0.09214231]
+         [ 0.08027787  0.098042   -0.08962372]
+         [ 0.08205428  0.11961133 -0.08715505]
+         [ 0.08580998  0.14146193 -0.08473277]
+         [ 0.09137518  0.16414681 -0.08235184]
+         [ 0.09865234  0.18816564 -0.0800058 ]
+         [ 0.10760367  0.21398557 -0.07768669]]
 
         See Also
         -----
@@ -95,4 +107,5 @@ class Lorenz(BaseAttractor):
 
 
 if __name__ == "__main__":
-    lorenz = Lorenz(num_points=2 ** 10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
+    lorenz = Lorenz(num_points=10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
+    print(lorenz.coordinates)

@@ -98,6 +98,11 @@ class BaseAttractor:
      [ 0.23579477  4.71589538 -1.17897385]]
     >>> print(len(model))
     10
+    >>> model.update_attributes(num_points=1, init_point=(0, 1, 2), nfft=8)
+    >>> model.__dict__
+    {'num_points': 1, 'init_point': (0, 1, 2), 'step': 10, 'nfft': 8, '_coordinates': None}
+    >>> len(model)
+    1
 
     See Also:
     -----
