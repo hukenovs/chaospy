@@ -43,9 +43,9 @@ OR CORRECTION.
 from abc import abstractmethod
 from typing import Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import kurtosis, skew
+from src.utils.drawer import PlotDrawer
 
 CHARGS = {
     "chua": {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714},
@@ -81,8 +81,8 @@ class BaseAttractor:
     --------
     >>> from src.attractors.attractor import BaseAttractor
     >>> coordinates = (0, 1, -1)
-    >>> chaotic_system = BaseAttractor(num_points=10, init_point=(0.1, 2, -0.5), step=10)
-    >>> print(chaotic_system.coordinates)
+    >>> model = BaseAttractor(num_points=10, init_point=(0.1, 2, -0.5), step=10)
+    >>> print(model.coordinates)
     [[ 0.1         2.         -0.5       ]
      [ 0.11        2.2        -0.55      ]
      [ 0.121       2.42       -0.605     ]
@@ -93,12 +93,12 @@ class BaseAttractor:
      [ 0.19487171  3.8974342  -0.97435855]
      [ 0.21435888  4.28717762 -1.07179441]
      [ 0.23579477  4.71589538 -1.17897385]]
-    >>> chaotic_attractor.check_moments()
-    Mean      : [ 0.15937425  3.18748492 -0.79687123]
-    Variance  : [0.00187366 0.7494636  0.04684147]
-    Skewness  : [ 0.31613174  0.31613174 -0.31613174]
-    Kurtosis  : [-1.12057948 -1.12057948 -1.12057948]
-    Median    : [ 0.1537305  3.07461   -0.7686525]
+    >>> model.check_moments(is_global=True)
+    Mean      : 0.84999
+    Variance  : 3.15038
+    Skewness  : 0.78675
+    Kurtosis  : -0.7909
+    Median    : 0.15373
 
     See Also:
     -----
@@ -115,6 +115,7 @@ class BaseAttractor:
         step: float = 1.0,
         nfft: int = 1024,
         show_log: bool = False,
+        save_plots: bool = False,
     ):
         if show_log:
             print(f"[INFO]: Initialize chaotic system: {self.__class__.__name__}")
@@ -125,6 +126,8 @@ class BaseAttractor:
         self.show_log = show_log
         # Internal attributes
         self._coordinates = None
+        # Plot drawer
+        self.drawer = PlotDrawer(self.__class__.__name__, self.coordinates, self.num_points, save_plots,)
 
     @property
     def coordinates(self):
@@ -206,31 +209,24 @@ class BaseAttractor:
         pass
         # TODO: Implement this method!
 
-    def show_time_plots(self, save_plots: bool = False):
-        """Plot 3D coordinates as time series."""
-        plt.figure("Coordinates evolution in time", figsize=(8, 6), dpi=100)
-        for ii, axis in enumerate(["X", "Y", "Z"]):
-            plt.subplot(3, 1, ii + 1)
-            plt.plot(self.coordinates[:, ii], linewidth=0.75)
-            plt.grid(True)
-            if axis == "Z":
-                plt.xlabel("Time")
-            plt.ylabel(axis)
-            plt.xlim([0, self.num_points - 1])
-        plt.tight_layout()
-        if save_plots:
-            plt.savefig(f"{self.__class__.__name__}_coordinates.png")
-        plt.show()
-
     def __call__(self, save_plots: bool = False):
-        print("\n[INFO]: Calculate mean, variance, skewness, kurtosis and median for chaotic system:")
+        if self.show_log:
+            print("\n[INFO]: Calculate mean, variance, skewness, kurtosis and median for chaotic system:")
         _moments = self.check_moments()
         for _key in _moments:
             print(f"{_key:<10}: {_moments[_key]}")
-        self.show_time_plots(save_plots=save_plots)
+
+        if self.show_log:
+            print("\n[INFO]: Calculate moments:")
+        _global_moments = self.check_moments(is_global=True)
+        for _key in _global_moments:
+            print(f"{_key:<10}: {_global_moments[_key]}")
+
+        self.drawer.show_3d_plots()
 
 
 if __name__ == "__main__":
-    chaotic_attractor = BaseAttractor(num_points=10, init_point=(0.1, 2, -0.5), step=10, nfft=32)
-    print(chaotic_attractor.coordinates)
-    chaotic_attractor()
+
+    model = BaseAttractor(num_points=10, init_point=(0.1, 2, -0.5), step=10, nfft=32)
+    print(model.coordinates)
+    model()
