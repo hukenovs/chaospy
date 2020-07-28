@@ -71,13 +71,10 @@ class DynamicSystem:
 
     """
 
-    def __init__(self, save_plots: bool = False):
+    def __init__(self, model: BaseAttractor = None, save_plots: bool = False):
         self.drawer = PlotDrawer(save_plots)
         self.calculator = Calculator()
-        self.attractor = None
-
-    def set_attractor(self, chaotic):
-        self.attractor = chaotic
+        self.model = model
 
     # def __call__(self, save_plots: bool = False):
     #     if self.show_log:
@@ -96,10 +93,11 @@ class DynamicSystem:
 
 
 if __name__ == "__main__":
-    model = DynamicSystem()
-    attractor = BaseAttractor(num_points=100, init_point=(0, 1, 2), step=10)
-    model.set_attractor(attractor)
+    from src.attractors.lorenz import Lorenz
 
-    moments = model.calculator.check_moments(model.attractor.coordinates)
+    dynamic_system = DynamicSystem(model=Lorenz(num_points=100, init_point=(0, 0.1, 0.2), step=100), save_plots=False)
+
+    coordinates = dynamic_system.model.get_coordinates()
+    moments = dynamic_system.calculator.check_moments(coordinates)
     for _key in moments:
         print(f"{_key:<10}: {list(moments[_key])}")

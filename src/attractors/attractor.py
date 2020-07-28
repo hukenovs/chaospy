@@ -45,14 +45,6 @@ from typing import Tuple
 
 import numpy as np
 
-CHARGS = {
-    "chua": {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714},
-    "duffing": {"a": 0.1, "b": 11},
-    "lorenz": {"sigma": 10, "beta": 8 / 3, "rho": 28},
-    "rikitake": {"a": 1, "mu": 1},
-    "rossler": {"a": 0.2, "b": 0.2, "c": 5.7},
-}
-
 
 class BaseAttractor:
     """Base class for 3D chaotic system.
@@ -72,20 +64,12 @@ class BaseAttractor:
     step: float / int
         Step for the next coordinate of dynamic system. Default: 1.0.
 
-    nfft: int
-        Number of points for Fast Fourier transform. Default: 1024.
-
-    Attributes
-    ----------
-    _coordinates : np.array
-        Numpy 3D array of coordinates for chaotic model. Has shape (num_points, 3).
-
     Examples
     --------
     >>> from src.attractors.attractor import BaseAttractor
     >>> coordinates = (0, 1, -1)
     >>> model = BaseAttractor(num_points=10, init_point=(0.1, 2, -0.5), step=10)
-    >>> print(model.coordinates)
+    >>> print(model.get_coordinates())
     [[ 0.1         2.         -0.5       ]
      [ 0.11        2.2        -0.55      ]
      [ 0.121       2.42       -0.605     ]
@@ -117,7 +101,6 @@ class BaseAttractor:
         num_points: int,
         init_point: Tuple[float, float, float] = (1e-4, 1e-4, 1e-4),
         step: float = 1.0,
-        nfft: int = 1024,
         show_log: bool = False,
     ):
         if show_log:
@@ -125,49 +108,25 @@ class BaseAttractor:
         self.num_points = num_points
         self.init_point = init_point
         self.step = step
-        self.nfft = nfft
-        # Internal attributes
-        self._coordinates = None
 
-    @property
-    def coordinates(self):
-        if self._coordinates is None:
-            self._coordinates = np.array(list(next(self)))
-        return self._coordinates
-
-    @coordinates.setter
-    def coordinates(self, value):
-        self._coordinates = value
-
-    # @coordinates.deleter
-    # def coordinates(self):
-    #     self._coordinates = None
+    def get_coordinates(self):
+        return np.array(list(next(self)))
 
     def __len__(self):
-        return len(self.coordinates)
+        return self.num_points
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        coordinates = self.init_point
+        points = self.init_point
         for _ in range(self.num_points):
-            yield coordinates
-            next_coordinates = self.attractor(*coordinates)
-            coordinates = tuple(prev + curr / self.step for prev, curr in zip(coordinates, next_coordinates))
-
-    # def __next__(self):
-    #     if self.coordinates is None:
-    #         self.coordinates = self.init_point
-    #         return self.coordinates
-    #
-    #     next_coordinates = self.attractor(*self.coordinates, **self.kwargs)
-    #     self.coordinates = tuple(prev + curr / self.step for prev, curr in zip(self.coordinates,
-    #     next_coordinates))
-    #     return self.coordinates
+            yield points
+            next_points = self.attractor(*points)
+            points = tuple(prev + curr / self.step for prev, curr in zip(points, next_points))
 
     @abstractmethod
-    def attractor(self, x: float, y: float, z: float, **kwargs) -> Tuple[float, float, float]:
+    def attractor(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
         """Calculate the next coordinate X, Y, Z for chaotic system.
         Do not use this method for parent BaseAttractor class.
 
@@ -182,21 +141,19 @@ class BaseAttractor:
             The next coordinates: X, Y, Z respectively
         """
         # raise NotImplementedError
-        return x, y, z
+        return x + y + z, y - z, x ** 2 - z ** 2
 
     def update_attributes(self, **kwargs):
         """Update chaotic system parameters."""
         for key in kwargs:
             if key in self.__dict__ and not key.startswith("_"):
                 self.__dict__[key] = kwargs.get(key)
-                self.coordinates = None
 
 
 if __name__ == "__main__":
 
-    model = BaseAttractor(num_points=10, init_point=(0.1, 2, -0.5), step=10, nfft=32)
-    print(model.__dict__)
-    print(model.coordinates)
-    model.update_attributes(num_points=5, step=100)
-    print(model.__dict__)
-    print(model.coordinates)
+    model = BaseAttractor(num_points=10, init_point=(-0.01, 0.5, 2), step=100)
+    print(f"Model attributes: {model.__dict__}")
+    print(f"Model length: {len(model)}")
+    coordinates = model.get_coordinates()
+    print(coordinates)
