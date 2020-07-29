@@ -89,6 +89,8 @@ ht = mu1*x + 0.5*(mu0 - mu1)*(np.abs(x + 1) - np.abs(x - 1))
 where alpha = 15.6, beta = 28, mu0 = -1.143, mu1 = -0.714.
 
 ![](https://github.com/capitanov/chaospy/blob/master/img/Chua2_3D.png)
-See more: [Wikipedia about attractors](https://en.wikipedia.org/wiki/Attractor "Attractors")
+
+#### See more:
+[Wikipedia about attractors](https://en.wikipedia.org/wiki/Attractor "Attractors")
 
 My topics (Russian lang.): https://habr.com/users/capitanov/topics/
