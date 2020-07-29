@@ -1,4 +1,4 @@
-"""Lorenz Attractor
+r"""Lorenz Attractor
 
 Description:
     Lorenz attractor is ordinary differential equation (ODE) of 3rd order system.
@@ -66,7 +66,7 @@ class Lorenz(BaseAttractor):
     def attractor(
         self, x: float, y: float, z: float, sigma: float = 10, beta: float = 8 / 3, rho: float = 28,
     ) -> Tuple[float, float, float]:
-        """Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
+        r"""Calculate the next coordinate X, Y, Z for 3rd-order Lorenz system
 
         Parameters
         ----------

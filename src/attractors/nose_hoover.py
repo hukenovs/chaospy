@@ -1,4 +1,4 @@
-"""Nose-Hoover attractor system.
+r"""Nose-Hoover attractor system.
 
 Description:
     The Nose–Hoover thermostat is a deterministic algorithm for
@@ -61,7 +61,7 @@ class NoseHoover(BaseAttractor):
     """Nose Hoover attractor."""
 
     def attractor(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
-        """Calculate the next coordinate X, Y, Z for 3rd-order Nose Hoover system
+        r"""Calculate the next coordinate X, Y, Z for 3rd-order Nose Hoover system
 
         Parameters
         ----------

@@ -1,4 +1,4 @@
-"""Wang 3D attractor system. It also has 4D realization.
+r"""Wang 3D attractor system. It also has 4D realization.
 
 Description   :
     Wang system (improved Lorenz model) as classic chaotic attractor
@@ -45,18 +45,52 @@ OR CORRECTION.
 
 from typing import Tuple
 
+from src.attractors.attractor import BaseAttractor
 
-def wang(x: float = 0, y: float = 0, z: float = 1) -> Tuple[float, float, float]:
-    """Calculate the next coordinate X, Y, Z for 3rd-order Wang Attractor
 
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates Z, Y, Z respectively
-    """
+class Wang(BaseAttractor):
+    """Wang attractor (it is improved version of Lorenz model)."""
 
-    # Next step coordinates:
-    x_out = x - y * z
-    y_out = x - y + x * z
-    z_out = -3 * z + x * y
-    return x_out, y_out, z_out
+    def attractor(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
+        r"""Calculate the next coordinate X, Y, Z for 3rd-order Wang system
+
+        Parameters
+        ----------
+        x, y, z : float
+            Input coordinates X, Y, Z respectively.
+
+        Examples
+        --------
+        >>> from src.attractors.wang import Wang
+        >>> coordinates = (0, 1, -1)
+        >>> model = Wang(num_points=1)
+        >>> output = model.attractor(*coordinates)
+        >>> print(output)
+        (1, -1, 3)
+        >>> model = Wang(num_points=10, init_point=(0.1, 0, -0.1), step=100)
+        >>> print(model.get_coordinates())
+        [[ 0.1         0.         -0.1       ]
+         [ 0.101       0.0009     -0.097     ]
+         [ 0.10201087  0.00180303 -0.09408909]
+         [ 0.10303268  0.00270913 -0.09126458]
+         [ 0.10406548  0.00361833 -0.08852385]
+         [ 0.10510934  0.00453068 -0.08586437]
+         [ 0.10616432  0.00544621 -0.08328368]
+         [ 0.1072305   0.00636498 -0.08077938]
+         [ 0.10830794  0.00728701 -0.07834918]
+         [ 0.10939673  0.00821236 -0.07599081]]
+
+        See Also
+        -----
+        No links.
+        """
+        x_out = x - y * z
+        y_out = x - y + x * z
+        z_out = -3 * z + x * y
+        return x_out, y_out, z_out
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=1)

@@ -1,6 +1,6 @@
-"""Rossler attractor (see 'Strange attractors' book).
+r"""Rossler attractor (see 'Strange attractors' book).
 
-Description   :
+Description :
     Rossler attractor is the attractor for the Rössler system. Rossler
     attractor is a system of three non-linear ordinary differential
     equations.
@@ -22,9 +22,9 @@ Description   :
     Varying a:
     b = 0.2 and c = 5.7 are fixed. Change a:
 
-    a <= 0	    : Converges to the centrally located fixed point
-    a = 0.1	    : Unit cycle of period 1
-    a = 0.2	    : Standard parameter value selected by Rössler, chaotic
+    a <= 0      : Converges to the centrally located fixed point
+    a = 0.1     : Unit cycle of period 1
+    a = 0.2     : Standard parameter value selected by Rössler, chaotic
     a = 0.3     : Chaotic attractor, significantly more Möbius strip-like
                 (folding over itself).
     a = 0.35    : Similar to .3, but increasingly chaotic
@@ -86,27 +86,60 @@ OR CORRECTION.
 
 from typing import Tuple
 
+from src.attractors.attractor import BaseAttractor
 
-def rossler(x: float = 0, y: float = 0, z: float = 1, **kwargs) -> Tuple[float, float, float]:
-    """Calculate the next coordinate X, Y, Z for 3rd-order Rossler system
 
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates X, Y, Z respectively
-    kwargs : dict
-        a, b and c - are Rossler system parameters
+class Rossler(BaseAttractor):
+    """Rossler attractor."""
 
-    """
+    def attractor(
+        self, x: float, y: float, z: float, a: float = 0.2, b: float = 0.2, c: float = 5.7,
+    ) -> Tuple[float, float, float]:
+        r"""Calculate the next coordinate X, Y, Z for 3rd-order Rossler system
 
-    # Default Rossler parameters:
-    a = kwargs.get("a", 0.2)
-    b = kwargs.get("b", 0.2)
-    c = kwargs.get("c", 5.7)
+        Parameters
+        ----------
+        x, y, z : float
+            Input coordinates X, Y, Z respectively.
+        a, b, c : float
+            Rossler system parameters. Default:
+            1) a = 0.2, b = 0.2 and c = 5.7 (Standard model)
+            2) a = 0.1, b = 0.1 and c = 14 (another useful parameters)
+            3) a = 0.5, b = 1.0 and c = 3 (J. C. Sprott)
 
-    # Next step coordinates:
-    x_out = -(y + z)
-    y_out = x + a * y
-    z_out = b + z * (x - c)
+        Examples
+        --------
+        >>> from src.attractors.rossler import Rossler
+        >>> coordinates = (0, 1, -1)
+        >>> model = Rossler(num_points=1)
+        >>> output = model.attractor(*coordinates)
+        >>> print(output)
+        (0, 0.2, 5.9)
+        >>> model = Rossler(num_points=10, init_point=(0.1, 0, -0.1), step=100)
+        >>> print(model.get_coordinates())
+        [[ 0.1         0.         -0.1       ]
+         [ 0.101       0.001      -0.0924    ]
+         [ 0.101914    0.002012   -0.08522652]
+         [ 0.10274615  0.00303516 -0.07845547]
+         [ 0.10350035  0.0040687  -0.07206412]
+         [ 0.1041803   0.00511184 -0.06603105]
+         [ 0.10478949  0.00616386 -0.06033607]
+         [ 0.10533122  0.00722409 -0.05496014]
+         [ 0.10580858  0.00829185 -0.0498853 ]
+         [ 0.10622451  0.00936652 -0.04509462]]
 
-    return x_out, y_out, z_out
+        See Also
+        -----
+        https://en.wikipedia.org/wiki/R%C3%B6ssler_attractor
+        """
+        x_out = -(y + z)
+        y_out = x + a * y
+        z_out = b + z * (x - c)
+
+        return x_out, y_out, z_out
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=1)

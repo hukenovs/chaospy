@@ -1,4 +1,4 @@
-"""Chua attractor
+r"""Chua attractor
 
 Description:
     Chua circuit. This is a simple electronic circuit that exhibits
@@ -82,7 +82,7 @@ class Chua(BaseAttractor):
         mu0: float = -1.143,
         mu1: float = -0.714,
     ) -> Tuple[float, float, float]:
-        """Calculate the next coordinate X, Y, Z for Chua system.
+        r"""Calculate the next coordinate X, Y, Z for Chua system.
 
         Parameters
         ----------

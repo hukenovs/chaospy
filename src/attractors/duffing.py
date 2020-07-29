@@ -1,4 +1,4 @@
-"""Duffing map.
+r"""Duffing map.
 
 Description:
     Duffing map. It is a discrete-time dynamical system (2nd order)
@@ -65,7 +65,7 @@ class Duffing(BaseAttractor):
     def attractor(
         self, x: float, y: float, z: float, alpha: float = 0.1, beta: float = 11
     ) -> Tuple[float, float, float]:
-        """Calculate the next coordinate X, Y, Z for 3rd-order Duffing map.
+        r"""Calculate the next coordinate X, Y, Z for 3rd-order Duffing map.
         It is 2nd order attractor (Z coordinate = 1)
 
         Parameters
