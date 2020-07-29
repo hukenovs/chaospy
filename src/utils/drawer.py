@@ -65,7 +65,7 @@ class PlotDrawer:
     def model_name(self, model):
         self._model_name = model
 
-    def show_time_plots(self, coordinates: np.array, num_points: int):
+    def show_time_plots(self, coordinates: np.ndarray):
         """Plot 3D coordinates as time series."""
         plt.figure("Coordinates evolution in time", figsize=(8, 6), dpi=100)
         for ii, axis in enumerate(["X", "Y", "Z"]):
@@ -73,20 +73,20 @@ class PlotDrawer:
             plt.plot(coordinates[:, ii], linewidth=0.75)
             plt.grid(True)
             if axis == "Z":
-                plt.xlabel("Time")
+                plt.xlabel("Time (t)")
             plt.ylabel(axis)
-            plt.xlim([0, num_points - 1])
+            plt.xlim([0, len(coordinates) - 1])
         plt.tight_layout()
         if self.save_plots:
             plt.savefig(f"{self.model_name}_coordinates_in_time.png")
         plt.show()
 
-    def show_3d_plots(self, coordinates: np.array):
+    def show_3d_plots(self, coordinates: np.ndarray):
         """Plot 3D coordinates as time series."""
         plot_axis = ((1, 0), (1, 2), (2, 0))
         plot_labels = {0: "X", 1: "Y", 2: "Z"}
 
-        fig = plt.figure(f"3D model of {self.model_name} system", figsize=(8, 6), dpi=100)
+        fig = plt.figure(f"3D model of chaotic system", figsize=(8, 6), dpi=100)
         for ii, (xx, yy) in enumerate(plot_axis):
             plt.subplot(2, 2, 1 + ii)
             plt.plot(coordinates[:, xx], coordinates[:, yy], linewidth=0.75)

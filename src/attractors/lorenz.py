@@ -74,6 +74,9 @@ class Lorenz(BaseAttractor):
             Input coordinates X, Y, Z respectively.
         sigma, beta, rho : float
             Lorenz system parameters. Default:
+                - sigma = 10,
+                - beta = 8/3,
+                - rho = 28,
 
         Examples
         --------
@@ -84,7 +87,7 @@ class Lorenz(BaseAttractor):
         >>> print(output)
         (10, -1, 2.6666666666666665)
         >>> model = Lorenz(num_points=10, init_point=(0.1, 0, -0.1), step=100)
-        >>> print(model.coordinates)
+        >>> print(model.get_coordinates())
         [[ 0.1         0.         -0.1       ]
          [ 0.09        0.0281     -0.09733333]
          [ 0.08381     0.0531066  -0.09471249]
@@ -107,5 +110,6 @@ class Lorenz(BaseAttractor):
 
 
 if __name__ == "__main__":
-    lorenz = Lorenz(num_points=10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
-    print(lorenz.coordinates)
+    import doctest
+
+    doctest.testmod(verbose=1)

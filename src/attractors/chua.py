@@ -105,7 +105,7 @@ class Chua(BaseAttractor):
         >>> print(output)
         (15.6, -2, -28)
         >>> model = Chua(num_points=10, init_point=(0.1, 0, -0.1), step=100)
-        >>> print(model.coordinates)
+        >>> print(model.get_coordinates())
         [[ 1.00000000e-01  0.00000000e+00 -1.00000000e-01]
          [ 1.02230800e-01  0.00000000e+00 -1.00000000e-01]
          [ 1.04511365e-01  2.23080000e-05 -1.00000000e-01]
@@ -131,6 +131,6 @@ class Chua(BaseAttractor):
 
 
 if __name__ == "__main__":
-    # chua_defaults = {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714}
-    chua = Chua(num_points=10, init_point=(0.0, -0.1, -0.05), step=100, nfft=128)
-    print(chua.coordinates)
+    import doctest
+
+    doctest.testmod(verbose=1)

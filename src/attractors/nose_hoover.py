@@ -1,6 +1,10 @@
 """Nose-Hoover attractor system.
 
-Description   :
+Description:
+    The Nose–Hoover thermostat is a deterministic algorithm for
+    constant-temperature molecular dynamics simulations. It was originally
+    developed by Nose and was improved further by Hoover.
+
     Nose–Hoover oscillator is ordinary differential equation (ODE) of
     3rd order system.
     Nose–Hoover system has only five terms and two quadratic
@@ -45,24 +49,58 @@ OR CORRECTION.
 # ...
 # Contacts      : <empty>
 # ...
-# Release Date  : 2019/05/31
+# Release Date  : 2020/07/29
 # License       : GNU GENERAL PUBLIC LICENSE
 
 from typing import Tuple
 
+from src.attractors.attractor import BaseAttractor
 
-def nose_hoover(x: float = 0, y: float = 0, z: float = 1) -> Tuple[float, float, float]:
-    """Calculate the next coordinate X, Y, Z for 3rd-order Nose-Hoover
 
-    Parameters
-    ----------
-    x, y, z : float
-        Input coordinates X, Y, Z respectively
-    """
+class NoseHoover(BaseAttractor):
+    """Nose Hoover attractor."""
 
-    # Next step coordinates:
-    x_out = y
-    y_out = y * z - x
-    z_out = 1 - y * y
+    def attractor(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
+        """Calculate the next coordinate X, Y, Z for 3rd-order Nose Hoover system
 
-    return x_out, y_out, z_out
+        Parameters
+        ----------
+        x, y, z : float
+            Input coordinates X, Y, Z respectively.
+
+        Examples
+        --------
+        >>> from src.attractors.nose_hoover import NoseHoover
+        >>> coordinates = (0, 1, -1)
+        >>> model = NoseHoover(num_points=1)
+        >>> output = model.attractor(*coordinates)
+        >>> print(output)
+        (1, -1, 0)
+        >>> model = NoseHoover(num_points=10, init_point=(0.1, 0, -0.1), step=100)
+        >>> print(model.get_coordinates())
+        [[ 0.1         0.         -0.1       ]
+         [ 0.1        -0.001      -0.09      ]
+         [ 0.09999    -0.0019991  -0.08000001]
+         [ 0.09997001 -0.0029974  -0.07000005]
+         [ 0.09994003 -0.003995   -0.06000014]
+         [ 0.09990008 -0.00499201 -0.0500003 ]
+         [ 0.09985016 -0.00598851 -0.04000055]
+         [ 0.09979028 -0.00698462 -0.03000091]
+         [ 0.09972043 -0.00798042 -0.0200014 ]
+         [ 0.09964063 -0.00897603 -0.01000203]]
+
+        See Also
+        -----
+        https://en.wikipedia.org/wiki/Nos%C3%A9%E2%80%93Hoover_thermostat
+
+        """
+        x_out = y
+        y_out = y * z - x
+        z_out = 1 - y * y
+        return x_out, y_out, z_out
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=1)
