@@ -107,4 +107,4 @@ class LotkaVolterra(BaseAttractor):
 if __name__ == "__main__":
     import doctest
 
-    doctest.testmod(verbose=1)
+    doctest.testmod(verbose=True)

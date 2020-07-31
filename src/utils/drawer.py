@@ -53,8 +53,9 @@ class PlotDrawer:
 
     """
 
-    def __init__(self, save_plots: bool = False):
+    def __init__(self, save_plots: bool = False, show_at_last: bool = True):
         self.save_plots = save_plots
+        self.show_at_last = show_at_last
         self._model_name = None
 
     @property
@@ -79,7 +80,8 @@ class PlotDrawer:
         plt.tight_layout()
         if self.save_plots:
             plt.savefig(f"{self.model_name}_coordinates_in_time.png")
-        plt.show()
+        if not self.show_at_last:
+            plt.show()
 
     def show_3d_plots(self, coordinates: np.ndarray):
         """Plot 3D coordinates as time series."""
@@ -106,8 +108,19 @@ class PlotDrawer:
 
         if self.save_plots:
             plt.savefig(f"{self.model_name}_3d_coordinates.png")
-        plt.show()
+        if not self.show_at_last:
+            plt.show()
+
+    def show_all_plots(self):
+        if self.show_at_last:
+            plt.show()
 
 
 if __name__ == "__main__":
-    pass
+    drawer = PlotDrawer(save_plots=False)
+    np.random.seed(42)
+    points = np.random.randn(100, 3)
+
+    drawer.show_time_plots(coordinates=points)
+    drawer.show_3d_plots(coordinates=points)
+    drawer.show_all_plots()
