@@ -53,10 +53,11 @@ class PlotDrawer:
 
     """
 
-    def __init__(self, save_plots: bool = False, show_at_last: bool = True):
+    def __init__(self, save_plots: bool = False, show_plots: bool = False):
         self.save_plots = save_plots
-        self.show_at_last = show_at_last
+        self.show_plots = show_plots
         self._model_name = None
+        self._close_test = False
 
     @property
     def model_name(self):
@@ -68,7 +69,7 @@ class PlotDrawer:
 
     def show_time_plots(self, coordinates: np.ndarray):
         """Plot 3D coordinates as time series."""
-        plt.figure("Coordinates evolution in time", figsize=(8, 6), dpi=100)
+        _ = plt.figure("Coordinates evolution in time", figsize=(8, 6), dpi=100)
         for ii, axis in enumerate(["X", "Y", "Z"]):
             plt.subplot(3, 1, ii + 1)
             plt.plot(coordinates[:, ii], linewidth=0.75)
@@ -80,7 +81,7 @@ class PlotDrawer:
         plt.tight_layout()
         if self.save_plots:
             plt.savefig(f"{self.model_name}_coordinates_in_time.png")
-        if not self.show_at_last:
+        if self.show_plots:
             plt.show()
 
     def show_3d_plots(self, coordinates: np.ndarray):
@@ -108,19 +109,28 @@ class PlotDrawer:
 
         if self.save_plots:
             plt.savefig(f"{self.model_name}_3d_coordinates.png")
-        if not self.show_at_last:
+        if self.show_plots:
             plt.show()
 
     def show_all_plots(self):
-        if self.show_at_last:
+        """Cannot show all plots while 'show_plots' is True.
+        Note: After closing plots you cannot reopen them!
+        """
+        if not self.show_plots:
             plt.show()
+
+    @staticmethod
+    def close_all_plots():
+        plt.clf()
+        plt.cla()
+        plt.close()
 
 
 if __name__ == "__main__":
     drawer = PlotDrawer(save_plots=False)
     np.random.seed(42)
-    points = np.random.randn(100, 3)
-
+    points = np.cumsum(np.random.randn(200, 3), axis=1)
     drawer.show_time_plots(coordinates=points)
     drawer.show_3d_plots(coordinates=points)
     drawer.show_all_plots()
+    # Trick: press Q on each plot for exit.
