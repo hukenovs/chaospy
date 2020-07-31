@@ -3,7 +3,6 @@ WORKDIR /app
 COPY . /app
 
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r app/requirements.txt
+    pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["/bin/bash"]
-CMD python -m app.src.dynamic_system.py
+CMD python -m src.dynamic_system
