@@ -129,7 +129,8 @@ class PlotDrawer:
 if __name__ == "__main__":
     drawer = PlotDrawer(save_plots=False)
     np.random.seed(42)
-    points = np.cumsum(np.random.randn(200, 3), axis=1)
+    points = np.cumsum(np.random.randn(100, 3), axis=1)
+
     drawer.show_time_plots(coordinates=points)
     drawer.show_3d_plots(coordinates=points)
     drawer.show_all_plots()
