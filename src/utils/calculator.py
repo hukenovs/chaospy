@@ -57,7 +57,7 @@ class Calculator:
         pass
 
     @staticmethod
-    def check_min_max(coordinates: np.array) -> Tuple[float, float]:
+    def check_min_max(coordinates: np.ndarray) -> Tuple[float, float]:
         """Calculate minimum and maximum for X, Y, Z coordinates.
 
         Parameters
@@ -68,7 +68,7 @@ class Calculator:
         return np.min(coordinates, axis=0), np.max(coordinates, axis=0)
 
     @staticmethod
-    def check_moments(coordinates: np.array, is_common: bool = False) -> dict:
+    def check_moments(coordinates: np.ndarray, is_common: bool = False) -> dict:
         """Calculate stochastic parameters: mean, variance, skewness, kurtosis etc.
 
         Parameters
@@ -81,7 +81,6 @@ class Calculator:
             returns moments over all ndarray. Similar for axis or axes along
             which the moments are computed.
             The default is to compute the moments for each coordinate.
-
         """
         axis = None if is_common else 0
         return {
@@ -92,11 +91,11 @@ class Calculator:
             "Median": np.median(coordinates, axis=axis),
         }
 
-    def check_probability(self):
+    def check_probability(self, coordinates: np.ndarray):
         pass
         # TODO: Implement this method!
 
-    def calculate_fft(self):
+    def calculate_fft(self, coordinates: np.ndarray):
         pass
         # TODO: Implement this method!
 

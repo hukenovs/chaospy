@@ -76,6 +76,21 @@ class DynamicSystem:
         self.calculator = Calculator()
         self.model = model
 
+    def run(self):
+        _points = self.model.get_coordinates()
+
+        self.calculator.check_min_max(_points)
+        _moments = self.calculator.check_moments(_points)
+        self.calculator.check_probability(_points)
+        self.calculator.calculate_fft(_points)
+
+        for _key in _moments:
+            print(f"{_key:<10}: {list(_moments[_key])}")
+
+        self.drawer.show_time_plots(_points)
+        self.drawer.show_3d_plots(_points)
+        self.drawer.show_all_plots()
+
     # def __call__(self, save_plots: bool = False):
     #     if self.show_log:
     #         print("\n[INFO]: Calculate mean, variance, skewness, kurtosis and median for chaotic system:")
@@ -95,9 +110,6 @@ class DynamicSystem:
 if __name__ == "__main__":
     from src.attractors.lorenz import Lorenz
 
-    dynamic_system = DynamicSystem(model=Lorenz(num_points=100, init_point=(0, 0.1, 0.2), step=100), save_plots=False)
+    dynamic_system = DynamicSystem(model=Lorenz(num_points=10000, init_point=(0, 0.1, 0.2), step=100), save_plots=False)
 
-    coordinates = dynamic_system.model.get_coordinates()
-    moments = dynamic_system.calculator.check_moments(coordinates)
-    for _key in moments:
-        print(f"{_key:<10}: {list(moments[_key])}")
+    dynamic_system.run()

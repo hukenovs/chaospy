@@ -152,8 +152,8 @@ class BaseAttractor:
 
 if __name__ == "__main__":
 
-    model = BaseAttractor(num_points=10, init_point=(-0.01, 0.5, 2), step=100)
-    print(f"Model attributes: {model.__dict__}")
-    print(f"Model length: {len(model)}")
-    coordinates = model.get_coordinates()
-    print(coordinates)
+    base_model = BaseAttractor(num_points=10, init_point=(-0.01, 0.5, 2), step=100)
+    print(f"Model attributes: {base_model.__dict__}")
+    print(f"Model length: {len(base_model)}")
+    xyz = base_model.get_coordinates()
+    print(xyz)
