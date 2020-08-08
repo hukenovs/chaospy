@@ -36,6 +36,7 @@ OR CORRECTION.
 # License       : GNU GENERAL PUBLIC LICENSE
 
 import argparse
+import sys
 from typing import Optional, Sequence
 
 SET_OF_ATTRACTORS = {"lorenz", "rossler", "rikitake", "duffing", "wang", "nose-hoover", "chua", "lotka-volterra"}
@@ -81,18 +82,20 @@ def parse_arguments(
     sigma          = 10
     beta           = 2.6666666666666665
     rho            = 28
-    >>> command_line_str = "rossler", "--show_plots"
+    >>> command_line_str = "rossler --show_plots --a 2 --b 4".split()
     >>> args = parse_arguments(command_line_str, show_args=True)
     attractor      = rossler
     points         = 1024
     step           = 100
     show_plots     = True
     save_plots     = False
-    a              = 0.2
-    b              = 0.2
+    a              = 2.0
+    b              = 4.0
     c              = 5.7
+    >>> command_line_str = "wang --step 1 --points 10".split()
+    >>> args = parse_arguments(command_line_str)
     >>> print(args)
-    Namespace(a=0.2, attractor='rossler', b=0.2, c=5.7, points=1024, save_plots=False, show_plots=True, step=100)
+    Namespace(attractor='wang', points=10, save_plots=False, show_plots=False, step=1)
     """
     parser = argparse.ArgumentParser(
         description="Specify command line arguments for dynamic system."
@@ -128,9 +131,17 @@ def parse_arguments(
 
     # Getting default parameters for chosen attractor:
     # TODO: Replace this to sys args !
-    model_name = parser.parse_args(input_args).attractor
+    # model_name = parser.parse_args(input_args).attractor
+    if input_args is not None:
+        model_args = input_args
+    else:
+        model_args = sys.argv
+
+    model_name = (set(map(str.lower, model_args)) & SET_OF_ATTRACTORS).pop()
+
     # parser.set_defaults(attractor=model_name)
     model_args = DEFAULT_PARAMETERS.get(model_name)
+
     if model_args is not None:
         group_args = parser.add_argument_group("Parameters", f"Dynamyc system parameters for {model_name} model.")
         for key in model_args:
@@ -153,8 +164,9 @@ def parse_arguments(
 
 
 if __name__ == "__main__":
-    # parse_args = parse_arguments(input_args=("Rossler --show_plots".split()), show_help=True, show_args=True)
+    # parse_args = parse_arguments(show_args=True)
     # print(parse_args)
+
     import doctest
 
     doctest.testmod(verbose=True)
