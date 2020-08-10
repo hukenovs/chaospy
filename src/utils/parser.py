@@ -36,10 +36,9 @@ OR CORRECTION.
 # License       : GNU GENERAL PUBLIC LICENSE
 
 import argparse
-import sys
 from typing import Optional, Sequence
 
-SET_OF_ATTRACTORS = {"lorenz", "rossler", "rikitake", "duffing", "wang", "nose-hoover", "chua", "lotka-volterra"}
+SET_OF_ATTRACTORS = ("lorenz", "rossler", "rikitake", "duffing", "wang", "nose-hoover", "chua", "lotka-volterra")
 DEFAULT_PARAMETERS = {
     "lorenz": {"sigma": 10, "beta": 8 / 3, "rho": 28},
     "rikitake": {"a": 1, "mu": 1},
@@ -73,39 +72,33 @@ def parse_arguments(
     --------
     >>> from src.utils.parser import parse_arguments
     >>> command_line_str = "lorenz",
-    >>> args = parse_arguments(command_line_str, show_args=True)
-    attractor      = lorenz
+    >>> test_args = parse_arguments(command_line_str, show_args=True)
     points         = 1024
     step           = 100
     show_plots     = False
     save_plots     = False
+    attractor      = lorenz
     sigma          = 10
     beta           = 2.6666666666666665
     rho            = 28
-    >>> command_line_str = "rossler --show_plots --a 2 --b 4".split()
-    >>> args = parse_arguments(command_line_str, show_args=True)
-    attractor      = rossler
+    >>> command_line_str = "--show_plots rossler --a 2 --b 4".split()
+    >>> test_args = parse_arguments(command_line_str, show_args=True)
     points         = 1024
     step           = 100
     show_plots     = True
     save_plots     = False
+    attractor      = rossler
     a              = 2.0
     b              = 4.0
     c              = 5.7
-    >>> command_line_str = "wang --step 1 --points 10".split()
-    >>> args = parse_arguments(command_line_str)
-    >>> print(args)
+    >>> command_line_str = "--step 1 --points 10 wang".split()
+    >>> test_args = parse_arguments(command_line_str)
+    >>> print(test_args)
     Namespace(attractor='wang', points=10, save_plots=False, show_plots=False, step=1)
     """
     parser = argparse.ArgumentParser(
         description="Specify command line arguments for dynamic system."
         "Calculate some math parameters and plot some graphs of a given chaotic system."
-    )
-    parser.add_argument(
-        "attractor",
-        type=str.lower,
-        choices={"lorenz", "chua", "rossler", "rikitake", "wang", "nose-hoover", "duffing", "lotka-volterra"},
-        help=f"Select a chaotic model: Lorenz, Chua, Rossler, Duffing, etc. Default: Lorenz.",
     )
 
     parser.add_argument(
@@ -129,44 +122,46 @@ def parse_arguments(
     parser.add_argument("--show_plots", action="store_true", help="Show plots of a model. Default: False.")
     parser.add_argument("--save_plots", action="store_true", help="Save plots to PNG files. Default: False.")
 
-    # Getting default parameters for chosen attractor:
-    # TODO: Replace this to sys args !
-    # model_name = parser.parse_args(input_args).attractor
-    if input_args is not None:
-        model_args = input_args
-    else:
-        model_args = sys.argv
+    subparsers = parser.add_subparsers(
+        title="Chaotic models", description="You can select one of the chaotic models", dest="attractor"
+    )
 
-    model_name = (set(map(str.lower, model_args)) & SET_OF_ATTRACTORS).pop()
-
-    # parser.set_defaults(attractor=model_name)
-    model_args = DEFAULT_PARAMETERS.get(model_name)
-
-    if model_args is not None:
-        group_args = parser.add_argument_group("Parameters", f"Dynamyc system parameters for {model_name} model.")
-        for key in model_args:
-            group_args.add_argument(
-                f"--{key}",
-                type=float,
-                default=model_args[key],
-                action="store",
-                help=f"{model_name} system parameter. Default: {model_args[key]}",
-            )
+    sub_list = []
+    for attractor in SET_OF_ATTRACTORS:
+        chosen_items = DEFAULT_PARAMETERS.get(attractor)
+        chosen_model = f"{attractor}".capitalize()
+        subparser = subparsers.add_parser(f"{attractor}", help=f"{chosen_model} chaotic model")
+        if chosen_items is not None:
+            group = subparser.add_argument_group(title=f"{chosen_model} model arguments")
+            for key in chosen_items:
+                group.add_argument(
+                    f"--{key}",
+                    type=float,
+                    default=chosen_items[key],
+                    action="store",
+                    help=f"{chosen_model} system parameter. Default: {chosen_items[key]}",
+                )
+        sub_list.append(subparser)
 
     if show_help:
         parser.print_help()
+        for item in sub_list:
+            item.print_help()
 
-    ret_args = parser.parse_args(input_args)
+    args = parser.parse_args(input_args)
+    if vars(args)["attractor"] is None:
+        raise AssertionError(f"[FAIL]: Please select a chaotic model from the next set: {SET_OF_ATTRACTORS}")
     if show_args:
-        for arg in vars(ret_args):
-            print(f"{arg :<14} = {getattr(ret_args, arg)}")
-    return ret_args
+        for arg in vars(args):
+            print(f"{arg :<14} = {getattr(args, arg)}")
+
+    return args
 
 
 if __name__ == "__main__":
-    # parse_args = parse_arguments(show_args=True)
-    # print(parse_args)
+    # import doctest
+    #
+    # doctest.testmod(verbose=True)
 
-    import doctest
-
-    doctest.testmod(verbose=True)
+    args_main = parse_arguments(show_args=True)
+    print(args_main)
