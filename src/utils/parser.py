@@ -36,7 +36,18 @@ OR CORRECTION.
 # License       : GNU GENERAL PUBLIC LICENSE
 
 import argparse
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple, Union
+
+from src.attractors.chua import Chua
+from src.attractors.duffing import Duffing
+from src.attractors.lorenz import Lorenz
+from src.attractors.lotka_volterra import LotkaVolterra
+from src.attractors.nose_hoover import NoseHoover
+from src.attractors.rikitake import Rikitake
+from src.attractors.rossler import Rossler
+from src.attractors.wang import Wang
+
+AttractorType = Union[Chua, Duffing, Rossler, Lorenz, Wang, NoseHoover, Rikitake, Wang, LotkaVolterra]
 
 SET_OF_ATTRACTORS = ("lorenz", "rossler", "rikitake", "duffing", "wang", "nose-hoover", "chua", "lotka-volterra")
 DEFAULT_PARAMETERS = {
@@ -48,9 +59,80 @@ DEFAULT_PARAMETERS = {
 }
 
 
+class Settings:
+    r"""Attributes collection for chaotic system.
+
+    Attributes
+    ----------
+
+    attractor : Optional[AttractorType]
+        Chaotic model.
+
+    points : step
+        Number of points for 3D system.
+
+    step : float
+        Step for diff. equations.
+
+    show_plots : bool
+        Show plots after calculations: True / False.
+
+    save_plots : bool
+        Save plots after calculations: True / False.
+
+    """
+    __model_map = {
+        "lorenz": Lorenz,
+        "rossler": Rossler,
+        "rikitake": Rikitake,
+        "chua": Chua,
+        "duffing": Duffing,
+        "wang": Wang,
+        "nose-hoover": NoseHoover,
+        "lotka-volterra": LotkaVolterra,
+    }
+
+    def __init__(self, show_log: bool = False):
+        self.show_log = False
+        # Settings
+        self.attractor: str = "lorenz"
+        self.points: int = 1024
+        self.init_point: Tuple[float, float, float] = (0.1, 0.1, 0.1)
+        self.step: float = 10
+        self.show_plots: bool = False
+        self.save_plots: bool = False
+        self.kwargs: dict = {}
+        # Model
+        self._model: Optional[AttractorType] = None
+
+    @property
+    def model(self):
+        if self._model is None:
+            self._model = self.__model_map.get(self.attractor)(
+                num_points=self.points,
+                init_point=self.init_point,
+                step=self.step,
+                show_log=self.show_log,
+                **self.kwargs,
+            )
+        return self._model
+
+    def update_params(self, input_args: Optional[Sequence[str]] = None, show_args: bool = False):
+        r"""Update class attributes from command line parser.
+        Kwargs is a dictionary and it can have some parameters for chaotic model.
+
+        """
+        args_dict = parse_arguments(input_args=input_args, show_args=show_args)
+        for item in args_dict:
+            if hasattr(self, item):
+                setattr(self, item, args_dict[item])
+            else:
+                self.kwargs[item] = args_dict[item]
+
+
 def parse_arguments(
     input_args: Optional[Sequence[str]] = None, show_help: bool = False, show_args: bool = False
-) -> argparse.Namespace:
+) -> dict:
     """This method is an useful command line helper. You can use it with command line arguments.
 
     Parameters
@@ -65,7 +147,7 @@ def parse_arguments(
 
     Returns
     -------
-    arguments : Namespace
+    arguments : dict
         Parsed arguments from command line. Note: some arguments are positional.
 
     Examples
@@ -148,12 +230,12 @@ def parse_arguments(
         for item in sub_list:
             item.print_help()
 
-    args = parser.parse_args(input_args)
-    if vars(args)["attractor"] is None:
+    args = vars(parser.parse_args(input_args))
+    if args["attractor"] is None:
         raise AssertionError(f"[FAIL]: Please select a chaotic model from the next set: {SET_OF_ATTRACTORS}")
     if show_args:
-        for arg in vars(args):
-            print(f"{arg :<14} = {getattr(args, arg)}")
+        for arg in args:
+            print(f"{arg :<14} = {args[arg]}")
 
     return args
 
