@@ -77,7 +77,7 @@ class Calculator:
             Numpy 3D array of dynamic system coordinates.
 
         is_common : bool
-            If False method returns moments for each coordinate. Otherwise
+            If False - method returns moments for each coordinate. Otherwise
             returns moments over all ndarray. Similar for axis or axes along
             which the moments are computed.
             The default is to compute the moments for each coordinate.
