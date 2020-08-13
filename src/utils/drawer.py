@@ -56,12 +56,21 @@ class PlotDrawer:
 
     """
 
-    def __init__(self, save_plots: bool = False, show_plots: bool = False, model_name: str = None):
+    _plot_axis = ((1, 0), (1, 2), (2, 0))
+    _plot_labels = {0: "X", 1: "Y", 2: "Z"}
+
+    def __init__(
+        self, save_plots: bool = False, show_plots: bool = False, add_2d_gif: bool = False, model_name: str = None,
+    ):
         self.save_plots = save_plots
         self.show_plots = show_plots
+        self.add_2d_gif = add_2d_gif
+        self.time_or_dot = False
+
         self._model_name = model_name
         self._coordinates = None
         self._color_map = None
+        self._plot_list = None
 
     def __len__(self):
         return len(self.coordinates)
@@ -104,17 +113,25 @@ class PlotDrawer:
         if self.show_plots:
             plt.show()
 
-    def axis_defaults(self, ax):
-        ax.set_title(f"{self.model_name} attractor")
-        ax.set_xlabel("X")
-        ax.set_ylabel("Y")
-        ax.set_zlabel("Z")
-        ax.set_xlim3d(self.min_max_axis[0])
-        ax.set_ylim3d(self.min_max_axis[1])
-        ax.set_zlim3d(self.min_max_axis[2])
-        ax.xaxis.pane.fill = False
-        ax.yaxis.pane.fill = False
-        ax.zaxis.pane.fill = False
+    def _axis_defaults_3d(self, plots):
+        plots.set_title(f"{self.model_name} attractor")
+        plots.set_xlabel("X")
+        plots.set_ylabel("Y")
+        plots.set_zlabel("Z")
+        plots.set_xlim3d(self.min_max_axis[0])
+        plots.set_ylim3d(self.min_max_axis[1])
+        plots.set_zlim3d(self.min_max_axis[2])
+        plots.xaxis.pane.fill = False
+        plots.yaxis.pane.fill = False
+        plots.zaxis.pane.fill = False
+
+    def _axis_defaults_2d(self, plots):
+        for idx, (xx, yy) in enumerate(self._plot_axis):
+            plots[idx].set_xlim(self.min_max_axis[xx])
+            plots[idx].set_ylim(self.min_max_axis[yy])
+            plots[idx].set_xlabel(self._plot_labels[xx])
+            plots[idx].set_ylabel(self._plot_labels[yy])
+            plots[idx].grid(True)
         # ax.set_axis_off()
         # ax.xaxis.pane.set_edgecolor('w')
         # ax.yaxis.pane.set_edgecolor('w')
@@ -124,23 +141,21 @@ class PlotDrawer:
 
     def show_3d_plots(self):
         """Plot 3D coordinates as time series."""
-        plot_axis = ((1, 0), (1, 2), (2, 0))
-        plot_labels = {0: "X", 1: "Y", 2: "Z"}
 
         fig = plt.figure(f"3D model of {self.model_name} system", figsize=(8, 6), dpi=100)
-        for ii, (xx, yy) in enumerate(plot_axis):
+        for ii, (xx, yy) in enumerate(self._plot_axis):
             plt.subplot(2, 2, 1 + ii)
             plt.plot(self.coordinates[:, xx], self.coordinates[:, yy], linewidth=0.75)
             plt.grid()
-            plt.xlabel(plot_labels[xx])
-            plt.ylabel(plot_labels[yy])
+            plt.xlabel(self._plot_labels[xx])
+            plt.ylabel(self._plot_labels[yy])
             # TODO: 2020/07/26: Set limits!
             plt.xlim(self.min_max_axis[xx])
             plt.ylim(self.min_max_axis[yy])
 
         ax = fig.add_subplot(2, 2, 4, projection="3d")
         ax.plot(self.coordinates[:, 0], self.coordinates[:, 1], self.coordinates[:, 2], linewidth=0.7)
-        self.axis_defaults(ax)
+        self._axis_defaults_3d(ax)
         plt.tight_layout()
 
         if self.save_plots:
@@ -148,19 +163,31 @@ class PlotDrawer:
         if self.show_plots:
             plt.show()
 
+    def _add_2d_to_plots(self, figure):
+        self._plot_list += [figure.add_subplot(2, 2, 1 + ii) for ii in range(3)]
+        self._axis_defaults_2d(self._plot_list[1:])
+        plt.tight_layout()
+
     def make_3d_plot_gif(self, step_size: int = 10):
         """Make git for 3D coordinates as time series."""
-
+        nodes = 2 if self.add_2d_gif else 1
+        posit = 4 if self.add_2d_gif else 1
         fig = plt.figure(f"3D model of {self.model_name} system", figsize=(8, 6), dpi=100)
-        ax = fig.add_subplot(111, projection="3d")
-        self.axis_defaults(ax)
-        (pic,) = plt.plot([], [], ".--", lw=0.75)
+
+        self._plot_list = [fig.add_subplot(nodes, nodes, posit, projection="3d")]
+        self._axis_defaults_3d(self._plot_list[0])
+
+        if self.add_2d_gif:
+            self._add_2d_to_plots(fig)
+
+        # Convert ax to plot
+        self._plot_list = [item.plot([], [], ".--", lw=0.75)[0] for item in self._plot_list]
 
         step_dots = len(self.coordinates) // step_size
         self._color_map = plt.cm.get_cmap("hsv", step_dots)
 
         ani = animation.FuncAnimation(
-            fig, self.update_coordinates, step_dots, fargs=(step_size, pic), interval=100, blit=False, repeat=True
+            fig, self.update_coordinates, step_dots, fargs=(step_size,), interval=100, blit=False, repeat=True
         )
 
         if self.save_plots:
@@ -168,10 +195,16 @@ class PlotDrawer:
         if self.show_plots:
             plt.show()
 
-    def update_coordinates(self, num, step, pic):
-        pic.set_data(self.coordinates[0 : 1 + num * step, 0], self.coordinates[0 : 1 + num * step, 1])
-        pic.set_3d_properties(self.coordinates[0 : 1 + num * step, 2])
-        pic.set_color(self._color_map(num))
+    def update_coordinates(self, num, step):
+        self._plot_list[0].set_data(self.coordinates[0 : 1 + num * step, 0], self.coordinates[0 : 1 + num * step, 1])
+        self._plot_list[0].set_3d_properties(self.coordinates[0 : 1 + num * step, 2])
+        self._plot_list[0].set_color(self._color_map(num))
+        if self.add_2d_gif:
+            for ii, (x, y) in enumerate(self._plot_axis):
+                self._plot_list[ii + 1].set_data(
+                    self.coordinates[0 : 1 + num * step, x], self.coordinates[0 : 1 + num * step, y]
+                )
+                self._plot_list[ii + 1].set_color(self._color_map(num))
 
     def show_all_plots(self):
         """Cannot show all plots while 'show_plots' is True.
@@ -191,12 +224,13 @@ if __name__ == "__main__":
     np.random.seed(42)
     points = np.cumsum(np.random.randn(50, 3), axis=1)
 
-    drawer = PlotDrawer(show_plots=True)
+    drawer = PlotDrawer(show_plots=True, add_2d_gif=True)
     drawer.coordinates = points
     drawer.model_name = "Chaotic"
 
     # print(drawer.min_max_axis)
     drawer.make_3d_plot_gif()
-    # drawer.show_time_plots(coordinates=points)
+    # drawer.make_3d_plot_gif(show_2d_plots=True)
+    # drawer.show_time_plots()
     # drawer.show_3d_plots()
     # drawer.show_all_plots()

@@ -96,7 +96,9 @@ class DynamicSystem:
         self.model = self.settings.model
 
         # Update drawer for plots
-        self.drawer = PlotDrawer(save_plots=self.settings.save_plots, show_plots=self.settings.show_plots)
+        self.drawer = PlotDrawer(
+            save_plots=self.settings.save_plots, show_plots=self.settings.show_plots, add_2d_gif=True
+        )
         self.drawer.model_name = self.settings.attractor.capitalize()
 
         # Update main calculator
@@ -130,18 +132,19 @@ class DynamicSystem:
 
             # self.drawer.show_time_plots()
             # self.drawer.show_3d_plots()
-            self.drawer.make_3d_plot_gif(5)
+            self.drawer.make_3d_plot_gif(40)
             # self.drawer.show_all_plots()
 
 
 if __name__ == "__main__":
     command_line = (
         "--points",
-        "500",
+        "4000",
         "--step",
-        "100",
+        "40",
         "--save_plots",
-        "lorenz",
+        # "--show_plots",
+        "rossler",
     )
 
     dynamic_system = DynamicSystem(input_args=command_line, show_log=True)

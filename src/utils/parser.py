@@ -53,7 +53,7 @@ SET_OF_ATTRACTORS = ("lorenz", "rossler", "rikitake", "duffing", "wang", "nose-h
 DEFAULT_PARAMETERS = {
     "lorenz": {"sigma": 10, "beta": 8 / 3, "rho": 28},
     "rikitake": {"a": 1, "mu": 1},
-    "duffing": {"a": 0.1, "b": 11},
+    "duffing": {"alpha": 0.1, "beta": 11},
     "rossler": {"a": 0.2, "b": 0.2, "c": 5.7},
     "chua": {"alpha": 0.1, "beta": 28, "mu0": -1.143, "mu1": -0.714},
 }
