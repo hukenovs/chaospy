@@ -63,7 +63,7 @@ from src.attractors.attractor import BaseAttractor
 class LotkaVolterra(BaseAttractor):
     """Lotka-Volterra attractor."""
 
-    def attractor(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
+    def attractor(self, x: float, y: float, z: float, **kwargs) -> Tuple[float, float, float]:
         r"""Calculate the next coordinate X, Y, Z for 3rd-order Lotka-Volterra system
 
         Parameters

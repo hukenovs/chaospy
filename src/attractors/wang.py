@@ -51,7 +51,7 @@ from src.attractors.attractor import BaseAttractor
 class Wang(BaseAttractor):
     """Wang attractor (it is improved version of Lorenz model)."""
 
-    def attractor(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
+    def attractor(self, x: float, y: float, z: float, **kwargs) -> Tuple[float, float, float]:
         r"""Calculate the next coordinate X, Y, Z for 3rd-order Wang system
 
         Parameters

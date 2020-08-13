@@ -102,12 +102,14 @@ class BaseAttractor:
         init_point: Tuple[float, float, float] = (1e-4, 1e-4, 1e-4),
         step: float = 1.0,
         show_log: bool = False,
+        **kwargs: dict,
     ):
         if show_log:
-            print(f"[INFO]: Initialize chaotic system: {self.__class__.__name__}")
+            print(f"[INFO]: Initialize chaotic system: {self.__class__.__name__}\n")
         self.num_points = num_points
         self.init_point = init_point
         self.step = step
+        self.kwargs = kwargs
 
     def get_coordinates(self):
         return np.array(list(next(self)))
@@ -122,11 +124,11 @@ class BaseAttractor:
         points = self.init_point
         for _ in range(self.num_points):
             yield points
-            next_points = self.attractor(*points)
+            next_points = self.attractor(*points, **self.kwargs)
             points = tuple(prev + curr / self.step for prev, curr in zip(points, next_points))
 
     @abstractmethod
-    def attractor(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
+    def attractor(self, x: float, y: float, z: float, **kwargs) -> Tuple[float, float, float]:
         """Calculate the next coordinate X, Y, Z for chaotic system.
         Do not use this method for parent BaseAttractor class.
 

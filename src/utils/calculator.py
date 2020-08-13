@@ -57,7 +57,7 @@ class Calculator:
         pass
 
     @staticmethod
-    def check_min_max(coordinates: np.ndarray) -> Tuple[float, float]:
+    def check_min_max(coordinates: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Calculate minimum and maximum for X, Y, Z coordinates.
 
         Parameters
@@ -77,7 +77,7 @@ class Calculator:
             Numpy 3D array of dynamic system coordinates.
 
         is_common : bool
-            If False method returns moments for each coordinate. Otherwise
+            If False - method returns moments for each coordinate. Otherwise
             returns moments over all ndarray. Similar for axis or axes along
             which the moments are computed.
             The default is to compute the moments for each coordinate.
