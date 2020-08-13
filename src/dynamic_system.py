@@ -38,9 +38,13 @@ OR CORRECTION.
 # Release Date  : 2020/07/25
 # License       : GNU GENERAL PUBLIC LICENSE
 
-from src.attractors.attractor import BaseAttractor
+from typing import Optional
+
+import numpy as np
+import pandas as pd
 from src.utils.calculator import Calculator
 from src.utils.drawer import PlotDrawer
+from src.utils.parser import AttractorType, Settings
 
 
 class DynamicSystem:
@@ -52,8 +56,11 @@ class DynamicSystem:
 
     Attributes
     ----------
+    model: ChaoticAttractor()
     drawer: PlotDrawer()
     calculator: Calculator()
+    settings: Settings()
+
 
     Examples
     --------
@@ -71,45 +78,71 @@ class DynamicSystem:
 
     """
 
-    def __init__(self, model: BaseAttractor = None, save_plots: bool = False):
-        self.drawer = PlotDrawer(save_plots)
+    def __init__(self, input_args: Optional[tuple] = None, show_log: bool = False):
+        # Main modules
+        self.settings: Optional[Settings] = None
+        self.model: Optional[AttractorType] = None
+        self.drawer: Optional[PlotDrawer] = None
+        self.calculator: Optional[Calculator] = None
+        # Initialize attributes
+        self.initialize(input_args, show_log)
+
+    def initialize(self, input_args: Optional[tuple] = None, show_log: bool = False):
+        # Update parameters
+        self.settings = Settings(show_log=show_log)
+        self.settings.update_params(input_args, show_log)
+
+        # Update chaotic model
+        self.model = self.settings.model
+
+        # Update drawer for plots
+        self.drawer = PlotDrawer(save_plots=self.settings.save_plots, show_plots=self.settings.show_plots)
+        self.drawer.model_name = self.settings.attractor.capitalize()
+
+        # Update main calculator
         self.calculator = Calculator()
-        self.model = model
+
+    def collect_statistics(self, points: np.ndarray):
+        math_dict = {}
+        _min_max = self.calculator.check_min_max(points)
+        _moments = self.calculator.check_moments(points)
+        math_dict.update({"Min": _min_max[0]})
+        math_dict.update({"Max": _min_max[1]})
+        math_dict.update(_moments)
+        math_df = pd.DataFrame.from_dict(math_dict, columns=["X", "Y", "Z"], orient="index")
+        return math_df
 
     def run(self):
+        # Get vector of coordinates
         _points = self.model.get_coordinates()
 
-        self.calculator.check_min_max(_points)
-        _moments = self.calculator.check_moments(_points)
+        # Calculate
+        stats = self.collect_statistics(_points)
+        if self.settings.show_log:
+            print(f"[INFO]: Show statistics:\n{stats}\n")
+
         self.calculator.check_probability(_points)
         self.calculator.calculate_fft(_points)
 
-        for _key in _moments:
-            print(f"{_key:<10}: {list(_moments[_key])}")
+        # Draw results
+        if self.settings.show_plots or self.settings.save_plots:
+            self.drawer.coordinates = _points
 
-        self.drawer.show_time_plots(_points)
-        self.drawer.show_3d_plots(_points)
-        self.drawer.show_all_plots()
-
-    # def __call__(self, save_plots: bool = False):
-    #     if self.show_log:
-    #         print("\n[INFO]: Calculate mean, variance, skewness, kurtosis and median for chaotic system:")
-    #     _moments = self.check_moments()
-    #     for _key in _moments:
-    #         print(f"{_key:<10}: {_moments[_key]}")
-    #
-    #     if self.show_log:
-    #         print("\n[INFO]: Calculate moments:")
-    #     _global_moments = self.check_moments(is_global=True)
-    #     for _key in _global_moments:
-    #         print(f"{_key:<10}: {_global_moments[_key]}")
-    #
-    #     self.drawer.show_3d_plots()
+            # self.drawer.show_time_plots()
+            # self.drawer.show_3d_plots()
+            self.drawer.make_3d_plot_gif(5)
+            # self.drawer.show_all_plots()
 
 
 if __name__ == "__main__":
-    from src.attractors.lorenz import Lorenz
+    command_line = (
+        "--points",
+        "500",
+        "--step",
+        "100",
+        "--save_plots",
+        "lorenz",
+    )
 
-    dynamic_system = DynamicSystem(model=Lorenz(num_points=10000, init_point=(0, 0.1, 0.2), step=100), save_plots=False)
-
+    dynamic_system = DynamicSystem(input_args=command_line, show_log=True)
     dynamic_system.run()

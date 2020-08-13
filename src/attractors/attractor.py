@@ -105,7 +105,7 @@ class BaseAttractor:
         **kwargs: dict,
     ):
         if show_log:
-            print(f"[INFO]: Initialize chaotic system: {self.__class__.__name__}")
+            print(f"[INFO]: Initialize chaotic system: {self.__class__.__name__}\n")
         self.num_points = num_points
         self.init_point = init_point
         self.step = step

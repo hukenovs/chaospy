@@ -93,7 +93,7 @@ class Settings:
     }
 
     def __init__(self, show_log: bool = False):
-        self.show_log = False
+        self.show_log = show_log
         # Settings
         self.attractor: str = "lorenz"
         self.points: int = 1024
@@ -234,9 +234,10 @@ def parse_arguments(
     if args["attractor"] is None:
         raise AssertionError(f"[FAIL]: Please select a chaotic model from the next set: {SET_OF_ATTRACTORS}")
     if show_args:
+        print(f"[INFO]: Cmmaind line arguments: ")
         for arg in args:
             print(f"{arg :<14} = {args[arg]}")
-
+        print("")
     return args
 
 
