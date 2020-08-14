@@ -87,16 +87,16 @@ class DynamicSystem:
         # Initialize attributes
         self.initialize(input_args, show_log)
 
-    def initialize(self, input_args: Optional[tuple] = None, show_log: bool = False):
+    def initialize(self, input_args: Optional[tuple] = None, show_logs: bool = False):
         # Update parameters
-        self.settings = Settings(show_log=show_log)
-        self.settings.update_params(input_args, show_log)
+        self.settings = Settings(show_logs=show_logs)
+        self.settings.update_params(input_args)
 
         # Update chaotic model
         self.model = self.settings.model
 
         # Update drawer for plots
-        self.drawer = PlotDrawer(save_plots=self.settings.save_plots, show_plots=self.settings.show_plots)
+        self.drawer = PlotDrawer(self.settings.save_plots, self.settings.show_plots, self.settings.add_2d_gif)
         self.drawer.model_name = self.settings.attractor.capitalize()
 
         # Update main calculator
@@ -118,7 +118,7 @@ class DynamicSystem:
 
         # Calculate
         stats = self.collect_statistics(_points)
-        if self.settings.show_log:
+        if self.settings.show_logs:
             print(f"[INFO]: Show statistics:\n{stats}\n")
 
         self.calculator.check_probability(_points)
@@ -130,18 +130,22 @@ class DynamicSystem:
 
             # self.drawer.show_time_plots()
             # self.drawer.show_3d_plots()
-            self.drawer.make_3d_plot_gif(5)
+            self.drawer.make_3d_plot_gif(50)
             # self.drawer.show_all_plots()
 
 
 if __name__ == "__main__":
     command_line = (
+        "--init_point",
+        "1 -1 2",
         "--points",
-        "500",
+        "2000",
         "--step",
-        "100",
+        "50",
         "--save_plots",
-        "lorenz",
+        # "--show_plots",
+        "--add_2d_gif",
+        "rossler",
     )
 
     dynamic_system = DynamicSystem(input_args=command_line, show_log=True)
