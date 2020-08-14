@@ -69,8 +69,10 @@ class PlotDrawer:
 
         self._model_name = model_name
         self._coordinates = None
+        # Internal parameters
         self._color_map = None
         self._plot_list = None
+        self._min_max_axis = None
 
     def __len__(self):
         return len(self.coordinates)
@@ -92,7 +94,7 @@ class PlotDrawer:
         self._coordinates = value
 
     @property
-    @lru_cache(maxsize=8)
+    @lru_cache(maxsize=16)
     def min_max_axis(self):
         return np.vstack([np.min(self.coordinates, axis=0), np.max(self.coordinates, axis=0)]).T
 

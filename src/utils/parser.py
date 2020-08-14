@@ -49,7 +49,6 @@ from src.attractors.wang import Wang
 
 AttractorType = Union[Chua, Duffing, Rossler, Lorenz, Wang, NoseHoover, Rikitake, Wang, LotkaVolterra]
 
-SET_OF_ATTRACTORS = ("lorenz", "rossler", "rikitake", "duffing", "wang", "nose-hoover", "chua", "lotka-volterra")
 DEFAULT_PARAMETERS = {
     "lorenz": {"sigma": 10, "beta": 8 / 3, "rho": 28},
     "rikitake": {"a": 1, "mu": 1},
@@ -92,159 +91,196 @@ class Settings:
         "lotka-volterra": LotkaVolterra,
     }
 
-    def __init__(self, show_log: bool = False):
-        self.show_log = show_log
+    def __init__(self, show_logs: bool = False, show_help: bool = False):
+        self.show_logs = show_logs
+        self.show_help = show_help
         # Settings
         self.attractor: str = "lorenz"
+        self.init_point: Tuple[float, float, float] = (0.1, -0.1, 0.1)
         self.points: int = 1024
-        self.init_point: Tuple[float, float, float] = (0.1, 0.1, 0.1)
         self.step: float = 10
         self.show_plots: bool = False
         self.save_plots: bool = False
+        self.add_2d_gif: bool = False
         self.kwargs: dict = {}
         # Model
         self._model: Optional[AttractorType] = None
 
     @property
-    def model(self):
+    def model(self) -> Optional[AttractorType]:
+        r"""Return model from dict of attractors.
+        Set initial parameters.
+
+        """
         if self._model is None:
             self._model = self.__model_map.get(self.attractor)(
                 num_points=self.points,
                 init_point=self.init_point,
                 step=self.step,
-                show_log=self.show_log,
+                show_log=self.show_logs,
                 **self.kwargs,
             )
         return self._model
 
-    def update_params(self, input_args: Optional[Sequence[str]] = None, show_args: bool = False):
+    def update_params(self, input_args: Optional[Sequence[str]] = None):
         r"""Update class attributes from command line parser.
         Kwargs is a dictionary and it can have some parameters for chaotic model.
 
+        Parameters
+        ----------
+        input_args : tuple
+            Tuple of strings for input arguments. Example: ("--show_plots", "--step", "1000", "lorenz")
+
         """
-        args_dict = parse_arguments(input_args=input_args, show_args=show_args)
+        args_dict = self.parse_arguments(input_args=input_args, show_args=self.show_logs, show_help=self.show_help)
         for item in args_dict:
-            if hasattr(self, item):
+            if hasattr(self, item) and item is not None:
                 setattr(self, item, args_dict[item])
             else:
                 self.kwargs[item] = args_dict[item]
 
+        self.init_point = args_dict["init_point"]
 
-def parse_arguments(
-    input_args: Optional[Sequence[str]] = None, show_help: bool = False, show_args: bool = False
-) -> dict:
-    """This method is an useful command line helper. You can use it with command line arguments.
+    @staticmethod
+    def _three_floats(value) -> Tuple:
+        values = value.split()
+        if len(values) != 3:
+            print(f"[FAIL]: Please enter initial points as X, Y, Z list. Example: --init_point 1 2 3")
+            raise argparse.ArgumentError
+        return tuple(map(float, values))
 
-    Parameters
-    ----------
-    input_args: tuple
+    def parse_arguments(
+        self, input_args: Optional[Sequence[str]] = None, show_help: bool = False, show_args: bool = False
+    ) -> dict:
+        """This method is an useful command line helper. You can use it with command line arguments.
 
-    show_help : bool
-        Show help of argument parser.
+        Parameters
+        ----------
+        input_args : tuple
 
-    show_args : bool
-        Display arguments and their values as {key : item}
+        show_help : bool
+            Show help of argument parser.
 
-    Returns
-    -------
-    arguments : dict
-        Parsed arguments from command line. Note: some arguments are positional.
+        show_args : bool
+            Display arguments and their values as {key : item}
 
-    Examples
-    --------
-    >>> from src.utils.parser import parse_arguments
-    >>> command_line_str = "lorenz",
-    >>> test_args = parse_arguments(command_line_str, show_args=True)
-    points         = 1024
-    step           = 100
-    show_plots     = False
-    save_plots     = False
-    attractor      = lorenz
-    sigma          = 10
-    beta           = 2.6666666666666665
-    rho            = 28
-    >>> command_line_str = "--show_plots rossler --a 2 --b 4".split()
-    >>> test_args = parse_arguments(command_line_str, show_args=True)
-    points         = 1024
-    step           = 100
-    show_plots     = True
-    save_plots     = False
-    attractor      = rossler
-    a              = 2.0
-    b              = 4.0
-    c              = 5.7
-    >>> command_line_str = "--step 1 --points 10 wang".split()
-    >>> test_args = parse_arguments(command_line_str)
-    >>> print(test_args)
-    Namespace(attractor='wang', points=10, save_plots=False, show_plots=False, step=1)
-    """
-    parser = argparse.ArgumentParser(
-        description="Specify command line arguments for dynamic system."
-        "Calculate some math parameters and plot some graphs of a given chaotic system."
-    )
+        Returns
+        -------
+        arguments : dict
+            Parsed arguments from command line. Note: some arguments are positional.
 
-    parser.add_argument(
-        "-p",
-        "--points",
-        type=int,
-        default=1024,
-        action="store",
-        help=f"Number of points for dymanic system. Default: 1024",
-    )
+        Examples
+        --------
+        >>> from src.utils.parser import Settings
+        >>> settings = Settings()
+        >>> command_line_str = "lorenz",
+        >>> test_args = settings.parse_arguments(command_line_str, show_args=True)
+        [INFO]: Cmmaind line arguments:
+        points         = 1024
+        step           = 100
+        init_point     = (0.1, -0.1, 0.1)
+        show_plots     = False
+        save_plots     = False
+        add_2d_gif     = False
+        attractor      = lorenz
+        sigma          = 10
+        beta           = 2.6666666666666665
+        rho            = 28
 
-    parser.add_argument(
-        "-s",
-        "--step",
-        type=int,
-        default=100,
-        action="store",
-        help=f"Step size for calculating the next coordinates of chaotic system. Default: 100",
-    )
+        >>> command_line_str = "--show_plots rossler --a 2 --b 4".split()
+        >>> test_args = settings.parse_arguments(command_line_str, show_args=True)
+        [INFO]: Cmmaind line arguments:
+        points         = 1024
+        step           = 100
+        init_point     = (0.1, -0.1, 0.1)
+        show_plots     = True
+        save_plots     = False
+        add_2d_gif     = False
+        attractor      = rossler
+        a              = 2.0
+        b              = 4.0
+        c              = 5.7
 
-    parser.add_argument("--show_plots", action="store_true", help="Show plots of a model. Default: False.")
-    parser.add_argument("--save_plots", action="store_true", help="Save plots to PNG files. Default: False.")
+        """
+        parser = argparse.ArgumentParser(
+            description="Specify command line arguments for dynamic system."
+            "Calculate some math parameters and plot some graphs of a given chaotic system."
+        )
 
-    subparsers = parser.add_subparsers(
-        title="Chaotic models", description="You can select one of the chaotic models", dest="attractor"
-    )
+        parser.add_argument(
+            "-p",
+            "--points",
+            type=int,
+            default=1024,
+            action="store",
+            help=f"Number of points for dymanic system. Default: 1024.",
+        )
 
-    sub_list = []
-    for attractor in SET_OF_ATTRACTORS:
-        chosen_items = DEFAULT_PARAMETERS.get(attractor)
-        chosen_model = f"{attractor}".capitalize()
-        subparser = subparsers.add_parser(f"{attractor}", help=f"{chosen_model} chaotic model")
-        if chosen_items is not None:
-            group = subparser.add_argument_group(title=f"{chosen_model} model arguments")
-            for key in chosen_items:
-                group.add_argument(
-                    f"--{key}",
-                    type=float,
-                    default=chosen_items[key],
-                    action="store",
-                    help=f"{chosen_model} system parameter. Default: {chosen_items[key]}",
-                )
-        sub_list.append(subparser)
+        parser.add_argument(
+            "-s",
+            "--step",
+            type=int,
+            default=100,
+            action="store",
+            help=f"Step size for calculating the next coordinates of chaotic system. Default: 100.",
+        )
 
-    if show_help:
-        parser.print_help()
-        for item in sub_list:
-            item.print_help()
+        parser.add_argument(
+            "--init_point",
+            action="store",
+            type=self._three_floats,
+            default=(0.1, -0.1, 0.1),
+            help='Initial point as string of three floats: "X, Y, Z".',
+        )
+        parser.add_argument("--show_plots", action="store_true", help="Show plots of a model. Default: False.")
+        parser.add_argument("--save_plots", action="store_true", help="Save plots to PNG files. Default: False.")
+        parser.add_argument(
+            "--add_2d_gif", action="store_true", help="Add 2D coordinates to 3D model into GIF. Default: False."
+        )
 
-    args = vars(parser.parse_args(input_args))
-    if args["attractor"] is None:
-        raise AssertionError(f"[FAIL]: Please select a chaotic model from the next set: {SET_OF_ATTRACTORS}")
-    if show_args:
-        print(f"[INFO]: Cmmaind line arguments: ")
-        for arg in args:
-            print(f"{arg :<14} = {args[arg]}")
-        print("")
-    return args
+        subparsers = parser.add_subparsers(
+            title="Chaotic models", description="You can select one of the chaotic models:", dest="attractor"
+        )
+
+        sub_list = []
+        for attractor in [*self.__model_map]:
+            chosen_items = DEFAULT_PARAMETERS.get(attractor)
+            chosen_model = f"{attractor}".capitalize()
+            subparser = subparsers.add_parser(f"{attractor}", help=f"{chosen_model} chaotic model")
+            if chosen_items is not None:
+                group = subparser.add_argument_group(title=f"{chosen_model} model arguments")
+                for key in chosen_items:
+                    group.add_argument(
+                        f"--{key}",
+                        type=float,
+                        default=chosen_items[key],
+                        action="store",
+                        help=f"{chosen_model} system parameter. Default: {chosen_items[key]}",
+                    )
+            sub_list.append(subparser)
+
+        if show_help:
+            parser.print_help()
+            for item in sub_list:
+                item.print_help()
+
+        args = vars(parser.parse_args(input_args))
+        if args["attractor"] is None:
+            raise AssertionError(f"[FAIL]: Please select a chaotic model from the next set: {[*self.__model_map]}")
+        if show_args:
+            print(f"[INFO]: Cmmaind line arguments:")
+            for arg in args:
+                print(f"{arg :<14} = {args[arg]}")
+
+        if args["init_point"] is not None and len(args["init_point"]) != 3:
+            raise AssertionError(f"[FAIL]: Please enter initial points as X, Y, Z list. Example: --init_point 1 2 3")
+        return args
 
 
 if __name__ == "__main__":
-    # import doctest
-    #
-    # doctest.testmod(verbose=True)
+    import doctest
 
-    args_main = parse_arguments(show_args=True)
-    print(args_main)
+    doctest.testmod(verbose=True)
+    # command_line = "--init_point", '0 -1 2', "lorenz"
+    # params = Settings(show_logs=True, show_help=True)
+    # params.update_params(input_args=command_line)
