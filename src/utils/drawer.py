@@ -56,7 +56,7 @@ class PlotDrawer:
 
     """
 
-    _plot_axis = ((1, 0), (1, 2), (2, 0))
+    _plot_axis = ((0, 1), (2, 1), (0, 2))
     _plot_labels = {0: "X", 1: "Y", 2: "Z"}
 
     def __init__(
@@ -101,7 +101,7 @@ class PlotDrawer:
     def show_time_plots(self):
         """Plot 3D coordinates as time series."""
         _ = plt.figure("Coordinates evolution in time", figsize=(8, 6), dpi=100)
-        for ii, axis in enumerate(["X", "Y", "Z"]):
+        for ii, axis in enumerate(self._plot_labels.values()):
             plt.subplot(3, 1, ii + 1)
             plt.plot(self.coordinates[:, ii], linewidth=0.75)
             plt.grid(True)
@@ -116,7 +116,7 @@ class PlotDrawer:
             plt.show()
 
     def _axis_defaults_3d(self, plots):
-        plots.set_title(f"{self.model_name} attractor")
+        plots.set_title(f"{self.model_name} model")
         plots.set_xlabel("X")
         plots.set_ylabel("Y")
         plots.set_zlabel("Z")
@@ -151,12 +151,11 @@ class PlotDrawer:
             plt.grid()
             plt.xlabel(self._plot_labels[xx])
             plt.ylabel(self._plot_labels[yy])
-            # TODO: 2020/07/26: Set limits!
             plt.xlim(self.min_max_axis[xx])
             plt.ylim(self.min_max_axis[yy])
 
         ax = fig.add_subplot(2, 2, 4, projection="3d")
-        ax.plot(self.coordinates[:, 0], self.coordinates[:, 1], self.coordinates[:, 2], linewidth=0.7)
+        ax.plot(self.coordinates[:, 0], self.coordinates[:, 1], self.coordinates[:, 2], linewidth=0.75)
         self._axis_defaults_3d(ax)
         plt.tight_layout()
 
@@ -189,7 +188,7 @@ class PlotDrawer:
         self._color_map = plt.cm.get_cmap("hsv", step_dots)
 
         ani = animation.FuncAnimation(
-            fig, self.update_coordinates, step_dots, fargs=(step_size,), interval=100, blit=False, repeat=True
+            fig, self._update_coordinates, step_dots, fargs=(step_size,), interval=100, blit=False, repeat=True
         )
 
         if self.save_plots:
@@ -197,7 +196,8 @@ class PlotDrawer:
         if self.show_plots:
             plt.show()
 
-    def update_coordinates(self, num, step):
+    def _update_coordinates(self, num, step):
+        """Update plots for making gif"""
         self._plot_list[0].set_data(self.coordinates[0 : 1 + num * step, 0], self.coordinates[0 : 1 + num * step, 1])
         self._plot_list[0].set_3d_properties(self.coordinates[0 : 1 + num * step, 2])
         self._plot_list[0].set_color(self._color_map(num))
@@ -208,31 +208,55 @@ class PlotDrawer:
                 )
                 self._plot_list[ii + 1].set_color(self._color_map(num))
 
-    def show_all_plots(self):
-        """Cannot show all plots while 'show_plots' is True.
-        Note: After closing plots you cannot reopen them!
-        """
-        if not self.show_plots:
-            plt.show()
+    # def show_all_plots(self):
+    #     """Cannot show all plots while 'show_plots' is True.
+    #     Note: After closing plots you cannot reopen them!
+    #     """
+    #     if not self.show_plots:
+    #         plt.show()
+    #
+    # @staticmethod
+    # def close_all_plots():
+    #     plt.clf()
+    #     plt.cla()
+    #     plt.close()
 
-    @staticmethod
-    def close_all_plots():
-        plt.clf()
-        plt.cla()
-        plt.close()
+
+def random_circle(num_points: int = 100) -> np.ndarray:
+    r"""Create random circle for 3D plots.
+
+    Parameters
+    ----------
+    num_points : int
+        Number of points to draw
+
+    Returns
+    -------
+
+    arr: np.ndarray
+        Numpy 3D array with shapes [3, num_points]
+    """
+
+    angle = 3
+    ratio = 0.020
+
+    theta = np.linspace(0, angle * np.pi, num_points)
+    xyz = np.vstack([np.cos(theta), np.sin(theta), np.sin(np.linspace(0, 2.05 * np.pi, num_points))]).T
+    xyz += ratio * np.cumsum(np.random.randn(num_points, 3), axis=1)
+    return xyz
 
 
 if __name__ == "__main__":
     np.random.seed(42)
-    points = np.cumsum(np.random.randn(50, 3), axis=1)
+
+    circle_points = random_circle(num_points=200)
 
     drawer = PlotDrawer(show_plots=True, add_2d_gif=True)
-    drawer.coordinates = points
+    drawer.coordinates = circle_points
     drawer.model_name = "Chaotic"
 
     # print(drawer.min_max_axis)
-    drawer.make_3d_plot_gif()
-    # drawer.make_3d_plot_gif(show_2d_plots=True)
+    drawer.make_3d_plot_gif(step_size=20)
     # drawer.show_time_plots()
     # drawer.show_3d_plots()
     # drawer.show_all_plots()

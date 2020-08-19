@@ -42,7 +42,7 @@ OR CORRECTION.
 from typing import Tuple
 
 import numpy as np
-from scipy.stats import kurtosis, skew
+from scipy.stats import gaussian_kde, kurtosis, skew
 
 
 class Calculator:
@@ -53,29 +53,39 @@ class Calculator:
 
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, kde_dots: int = 1000):
+        self.kde_dots = kde_dots
+        self._coordinates = None
 
-    @staticmethod
-    def check_min_max(coordinates: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """Calculate minimum and maximum for X, Y, Z coordinates.
+    def __len__(self):
+        return len(self.coordinates)
+
+    @property
+    def coordinates(self) -> np.ndarray:
+        return self._coordinates
+
+    @coordinates.setter
+    def coordinates(self, value: np.ndarray):
+        """3D coordinates.
 
         Parameters
         ----------
-        coordinates: np.array
+        value : np.ndarray
             Numpy 3D array of dynamic system coordinates.
-        """
-        return np.min(coordinates, axis=0), np.max(coordinates, axis=0)
 
-    @staticmethod
-    def check_moments(coordinates: np.ndarray, is_common: bool = False) -> dict:
+        """
+        self._coordinates = value
+
+    def check_min_max(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Calculate minimum and maximum for X, Y, Z coordinates.
+        """
+        return np.min(self.coordinates, axis=0), np.max(self.coordinates, axis=0)
+
+    def check_moments(self, is_common: bool = False) -> dict:
         """Calculate stochastic parameters: mean, variance, skewness, kurtosis etc.
 
         Parameters
         ----------
-        coordinates: np.array
-            Numpy 3D array of dynamic system coordinates.
-
         is_common : bool
             If False - method returns moments for each coordinate. Otherwise
             returns moments over all ndarray. Similar for axis or axes along
@@ -84,21 +94,42 @@ class Calculator:
         """
         axis = None if is_common else 0
         return {
-            "Mean": np.mean(coordinates, axis=axis),
-            "Variance": np.var(coordinates, axis=axis),
-            "Skewness": skew(coordinates, axis=axis),
-            "Kurtosis": kurtosis(coordinates, axis=axis),
-            "Median": np.median(coordinates, axis=axis),
+            "Mean": np.mean(self.coordinates, axis=axis),
+            "Variance": np.var(self.coordinates, axis=axis),
+            "Skewness": skew(self.coordinates, axis=axis),
+            "Kurtosis": kurtosis(self.coordinates, axis=axis),
+            "Median": np.median(self.coordinates, axis=axis),
         }
 
-    def check_probability(self, coordinates: np.ndarray):
-        pass
-        # TODO: Implement this method!
+    def check_probability(self):
+        p_axi = np.zeros([3, self.kde_dots])
+        d_kde = np.zeros([3, self.kde_dots])
+        for ii in range(3):
+            p_axi[ii] = np.linspace(self.coordinates[ii, :].min(), self.coordinates[ii, :].max(), self.kde_dots)
+            d_kde[ii] = gaussian_kde(self.coordinates[ii, :]).evaluate(p_axi[ii, :])
+            d_kde[ii] /= d_kde[ii].max()
+        return d_kde
 
-    def calculate_fft(self, coordinates: np.ndarray):
+    def calculate_fft(self):
         pass
         # TODO: Implement this method!
 
 
 if __name__ == "__main__":
-    pass
+    calc = Calculator()
+
+    num_dots = 10000
+    np.random.seed(42)
+    calc.coordinates = np.random.randn(num_dots, 3)
+
+    dd_kde = calc.check_probability()
+    import matplotlib.pyplot as plt
+
+    print(dd_kde.shape)
+    plt.figure("Probability density function")
+    for ii in range(dd_kde.shape[0]):
+        plt.plot(dd_kde[ii], ".")
+        # plt.xlim([0, dd_kde.shape[1] - 1])
+        plt.grid()
+    plt.tight_layout()
+    plt.show()

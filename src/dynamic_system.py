@@ -40,7 +40,6 @@ OR CORRECTION.
 
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 from src.utils.calculator import Calculator
 from src.utils.drawer import PlotDrawer
@@ -60,7 +59,6 @@ class DynamicSystem:
     drawer: PlotDrawer()
     calculator: Calculator()
     settings: Settings()
-
 
     Examples
     --------
@@ -102,10 +100,10 @@ class DynamicSystem:
         # Update main calculator
         self.calculator = Calculator()
 
-    def collect_statistics(self, points: np.ndarray):
+    def collect_statistics(self):
         math_dict = {}
-        _min_max = self.calculator.check_min_max(points)
-        _moments = self.calculator.check_moments(points)
+        _min_max = self.calculator.check_min_max()
+        _moments = self.calculator.check_moments()
         math_dict.update({"Min": _min_max[0]})
         math_dict.update({"Max": _min_max[1]})
         math_dict.update(_moments)
@@ -115,14 +113,15 @@ class DynamicSystem:
     def run(self):
         # Get vector of coordinates
         _points = self.model.get_coordinates()
+        self.calculator.coordinates = _points
 
         # Calculate
-        stats = self.collect_statistics(_points)
+        stats = self.collect_statistics()
         if self.settings.show_logs:
             print(f"[INFO]: Show statistics:\n{stats}\n")
 
-        self.calculator.check_probability(_points)
-        self.calculator.calculate_fft(_points)
+        self.calculator.check_probability()
+        self.calculator.calculate_fft()
 
         # Draw results
         if self.settings.show_plots or self.settings.save_plots:
