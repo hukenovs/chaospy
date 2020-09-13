@@ -40,7 +40,6 @@ OR CORRECTION.
 
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 from src.utils.calculator import Calculator
 from src.utils.drawer import PlotDrawer
@@ -60,7 +59,6 @@ class DynamicSystem:
     drawer: PlotDrawer()
     calculator: Calculator()
     settings: Settings()
-
 
     Examples
     --------
@@ -102,10 +100,10 @@ class DynamicSystem:
         # Update main calculator
         self.calculator = Calculator()
 
-    def collect_statistics(self, points: np.ndarray):
+    def collect_statistics(self):
         math_dict = {}
-        _min_max = self.calculator.check_min_max(points)
-        _moments = self.calculator.check_moments(points)
+        _min_max = self.calculator.check_min_max()
+        _moments = self.calculator.check_moments()
         math_dict.update({"Min": _min_max[0]})
         math_dict.update({"Max": _min_max[1]})
         math_dict.update(_moments)
@@ -115,22 +113,24 @@ class DynamicSystem:
     def run(self):
         # Get vector of coordinates
         _points = self.model.get_coordinates()
+        self.calculator.coordinates = _points
 
         # Calculate
-        stats = self.collect_statistics(_points)
+        stats = self.collect_statistics()
         if self.settings.show_logs:
             print(f"[INFO]: Show statistics:\n{stats}\n")
 
-        self.calculator.check_probability(_points)
-        self.calculator.calculate_fft(_points)
+        self.calculator.check_probability()
+        spectrums = self.calculator.calculate_spectrum()
+        correlations = self.calculator.calculate_correlation()
 
         # Draw results
         if self.settings.show_plots or self.settings.save_plots:
             self.drawer.coordinates = _points
-
+            self.drawer.show_spectrum_and_correlation(spectrums, correlations)
             # self.drawer.show_time_plots()
             # self.drawer.show_3d_plots()
-            self.drawer.make_3d_plot_gif(50)
+            # self.drawer.make_3d_plot_gif(50)
             # self.drawer.show_all_plots()
 
 
@@ -139,13 +139,13 @@ if __name__ == "__main__":
         "--init_point",
         "1 -1 2",
         "--points",
-        "2000",
+        "3000",
         "--step",
         "50",
         "--save_plots",
         # "--show_plots",
         "--add_2d_gif",
-        "rossler",
+        "lorenz",
     )
 
     dynamic_system = DynamicSystem(input_args=command_line, show_log=True)
