@@ -59,6 +59,10 @@ where a = 0.2, b = 0.2 and c = 5.7.
 
 .. image:: https://raw.githubusercontent.com/capitanov/chaospy/master/img/Rossler_3D.png?sanitize=true
 
+Spectrum and auto-correlations::
+
+.. image:: https://raw.githubusercontent.com/capitanov/chaospy/master/img/Lorenz_Spectrum.png?sanitize=true
+
 Source code
 ~~~~~~~~~~~
 
