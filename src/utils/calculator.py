@@ -42,19 +42,21 @@ OR CORRECTION.
 from typing import Tuple
 
 import numpy as np
+from scipy.fftpack import fft, fftshift
 from scipy.stats import gaussian_kde, kurtosis, skew
 
 
 class Calculator:
-    """Main class for calculate math parameters.
+    """Main class for calculate math parameters: FFTs, Auto-Correlation, KDE (Prob) etc.
 
     See Also:
     -----
 
     """
 
-    def __init__(self, kde_dots: int = 1000):
+    def __init__(self, kde_dots: int = 1000, fft_dots: int = 4096):
         self.kde_dots = kde_dots
+        self.fft_dots = fft_dots
         self._coordinates = None
 
     def __len__(self):
@@ -102,6 +104,9 @@ class Calculator:
         }
 
     def check_probability(self):
+        """Check probability for each chaotic coordinates.
+
+        """
         p_axi = np.zeros([3, self.kde_dots])
         d_kde = np.zeros([3, self.kde_dots])
         for ii in range(3):
@@ -110,9 +115,26 @@ class Calculator:
             d_kde[ii] /= d_kde[ii].max()
         return d_kde
 
-    def calculate_fft(self):
-        pass
-        # TODO: Implement this method!
+    def calculate_spectrum(self):
+        """Calculate FFT (in dB) for input 3D coordinates. You can set number of FFT points into the object instance.
+
+        """
+        spectrum = fft(self.coordinates, self.fft_dots, axis=0)
+        spectrum = np.abs(fftshift(spectrum, axes=0))
+        # spectrum = np.abs(spectrum)
+        spectrum /= np.max(spectrum)
+        spec_log = 20 * np.log10(spectrum + np.finfo(np.float32).eps)
+        return spec_log
+
+    def calculate_correlation(self):
+        """Calculate auto correlation function for chaotic coordinates.
+
+        """
+        nn, mm = 3, len(self.coordinates)
+        auto_corr = np.zeros([mm, nn])
+        for ii in range(nn):
+            auto_corr[:, ii] = np.correlate(self.coordinates[:, ii], self.coordinates[:, ii], "same")
+        return auto_corr
 
 
 if __name__ == "__main__":
@@ -127,8 +149,8 @@ if __name__ == "__main__":
 
     print(dd_kde.shape)
     plt.figure("Probability density function")
-    for ii in range(dd_kde.shape[0]):
-        plt.plot(dd_kde[ii], ".")
+    for idx in range(dd_kde.shape[0]):
+        plt.plot(dd_kde[idx], ".")
         # plt.xlim([0, dd_kde.shape[1] - 1])
         plt.grid()
     plt.tight_layout()

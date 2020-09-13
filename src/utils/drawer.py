@@ -98,6 +98,49 @@ class PlotDrawer:
     def min_max_axis(self):
         return np.vstack([np.min(self.coordinates, axis=0), np.max(self.coordinates, axis=0)]).T
 
+    # TODO: Add plots for KDE
+    # # Plot Probability density function
+    # plt.figure("Probability density function")
+    # for ii in range(nn):
+    #     plt.plot(d_kde[ii], ".")
+    #     plt.xlim([0, n_pdf - 1])
+    #     plt.grid()
+    # plt.tight_layout()
+
+    def show_spectrum_and_correlation(self, spectrums: np.ndarray, correlations: np.ndarray):
+        """Plot 3D coordinates as time series."""
+        _ = plt.figure("Autocorrelation and Spectrum", figsize=(8, 6), dpi=100)
+
+        x_corr = np.linspace(-len(self.coordinates) // 2, len(self.coordinates) // 2, len(self.coordinates))
+        x_ffts = np.linspace(-0.5, 0.5, len(spectrums))
+
+        plt.suptitle(f"{self.model_name} attractor", x=0.1)
+        for ii, axis in enumerate(self._plot_labels.values()):
+            plt.subplot(3, 3, ii + 1)
+            plt.title("Time plots", y=1.0) if ii % 2 == 1 else None
+            plt.plot(self.coordinates[:, ii], linewidth=0.75)
+            plt.grid(True)
+            plt.ylabel(axis)
+            plt.xlim([0, len(self.coordinates) - 1])
+            plt.subplot(3, 3, ii + 4)
+            plt.title("Spectrum plots", y=1.0) if ii % 2 == 1 else None
+            plt.plot(x_ffts, spectrums[:, ii], linewidth=0.75)
+            plt.grid(True)
+            plt.ylabel(axis)
+            plt.xlim([np.min(x_ffts), np.max(x_ffts)])
+            plt.subplot(3, 3, ii + 7)
+            plt.title("Correlation plots", y=1.0) if ii % 2 == 1 else None
+            plt.plot(x_corr, correlations[:, ii], linewidth=0.75)
+            plt.grid(True)
+            plt.ylabel(axis)
+            plt.xlim([np.min(x_corr), np.max(x_corr)])
+        plt.tight_layout()
+
+        if self.save_plots:
+            plt.savefig(f"{self.model_name}_spectrum_correlations.png")
+        if self.show_plots:
+            plt.show()
+
     def show_time_plots(self):
         """Plot 3D coordinates as time series."""
         _ = plt.figure("Coordinates evolution in time", figsize=(8, 6), dpi=100)

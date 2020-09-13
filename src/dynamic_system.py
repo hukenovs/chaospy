@@ -121,15 +121,16 @@ class DynamicSystem:
             print(f"[INFO]: Show statistics:\n{stats}\n")
 
         self.calculator.check_probability()
-        self.calculator.calculate_fft()
+        spectrums = self.calculator.calculate_spectrum()
+        correlations = self.calculator.calculate_correlation()
 
         # Draw results
         if self.settings.show_plots or self.settings.save_plots:
             self.drawer.coordinates = _points
-
+            self.drawer.show_spectrum_and_correlation(spectrums, correlations)
             # self.drawer.show_time_plots()
             # self.drawer.show_3d_plots()
-            self.drawer.make_3d_plot_gif(50)
+            # self.drawer.make_3d_plot_gif(50)
             # self.drawer.show_all_plots()
 
 
@@ -138,13 +139,13 @@ if __name__ == "__main__":
         "--init_point",
         "1 -1 2",
         "--points",
-        "2000",
+        "3000",
         "--step",
         "50",
         "--save_plots",
         # "--show_plots",
         "--add_2d_gif",
-        "rossler",
+        "lorenz",
     )
 
     dynamic_system = DynamicSystem(input_args=command_line, show_log=True)
