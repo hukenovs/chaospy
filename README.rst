@@ -51,9 +51,9 @@ where sigma = 10, rho = 28 and beta = 8/3.
 
 Rossler attractor::
 
-    dx/dt = sigma * (y - x)
-    dy/dt = rho * (x - z) - y
-    dz/dt = x * y - beta * z
+    dx/dt = -(y + z)
+    dy/dt = x + a * y
+    dz/dt = b + z * (x - c)
 
 where a = 0.2, b = 0.2 and c = 5.7.
 
@@ -71,6 +71,7 @@ You can check the latest sources with the command::
     $ git clone https://github.com/capitanov/chaospy.git
     $ cd chaospy
     $ pip install -r requirements.txt
+    $ python -m src.dynamic_system.py <arguments>
 
 Help
 ~~~~
