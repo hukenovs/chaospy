@@ -28,7 +28,7 @@ Dependencies
 
 Project requires:
 
-- Python (>= 3.6)
+- Python (>= 3.9)
 - NumPy (>= 1.19.0)
 - SciPy (>= 1.5.1)
 - Pandas (>= 1.1.0)
@@ -68,8 +68,11 @@ Source code
 
 You can check the latest sources with the command::
 
-    $ git clone https://github.com/capitanov/chaospy.git
+    $ git clone <chaospy.git>
     $ cd chaospy
+    $ <install miniconda for your operation system>
+    $ conda create -y -n venv python==3.9
+    $ conda activate venv
     $ pip install -r requirements.txt
 
 Help
@@ -147,5 +150,5 @@ Chua circuit
 See Also
 ~~~~~~~~
 
-- `Wikipedia -> chaotic attractors. <https://en.wikipedia.org/wiki/Attractor>`__
-- `My articles on habrahabr. (rus lang.) <https://habr.com/users/capitanov/topics/>`__
+- `Wiki <https://en.wikipedia.org/wiki/Attractor>`__
+- `Habr <https://habr.com/users/hukenovs>`__

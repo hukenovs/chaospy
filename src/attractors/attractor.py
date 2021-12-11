@@ -122,10 +122,14 @@ class BaseAttractor:
 
     def __next__(self):
         points = self.init_point
-        for _ in range(self.num_points):
-            yield points
-            next_points = self.attractor(*points, **self.kwargs)
-            points = tuple(prev + curr / self.step for prev, curr in zip(points, next_points))
+        for i in range(self.num_points):
+            try:
+                yield points
+                next_points = self.attractor(*points, **self.kwargs)
+                points = tuple(prev + curr / self.step for prev, curr in zip(points, next_points))
+            except OverflowError:
+                print(f"[FAIL]: Cannot do the next step because of floating point overflow. Step: {i}")
+                break
 
     @abstractmethod
     def attractor(self, x: float, y: float, z: float, **kwargs) -> Tuple[float, float, float]:

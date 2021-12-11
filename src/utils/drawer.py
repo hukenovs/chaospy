@@ -98,14 +98,16 @@ class PlotDrawer:
     def min_max_axis(self):
         return np.vstack([np.min(self.coordinates, axis=0), np.max(self.coordinates, axis=0)]).T
 
-    # TODO: Add plots for KDE
-    # # Plot Probability density function
-    # plt.figure("Probability density function")
-    # for ii in range(nn):
-    #     plt.plot(d_kde[ii], ".")
-    #     plt.xlim([0, n_pdf - 1])
-    #     plt.grid()
-    # plt.tight_layout()
+    def plot_kde(self, kde: np.ndarray, pdf: np.ndarray):
+        """Plot Probability density function"""
+        _ = plt.figure("Probability density function", figsize=(8, 6), dpi=100)
+        for ii, axis in enumerate(self._plot_labels.values()):
+            plt.subplot(3, 3, ii + 1)
+            plt.title("KDE plots", y=1.0) if ii % 2 == 1 else None
+            plt.plot(kde[ii], ".")
+            plt.xlim([0, pdf - 1])
+            plt.grid()
+        plt.tight_layout()
 
     def show_spectrum_and_correlation(self, spectrums: np.ndarray, correlations: np.ndarray):
         """Plot 3D coordinates as time series."""
