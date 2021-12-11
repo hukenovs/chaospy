@@ -78,26 +78,16 @@ class DynamicSystem:
 
     def __init__(self, input_args: Optional[tuple] = None, show_log: bool = False):
         # Main modules
-        self.settings: Optional[Settings] = None
-        self.model: Optional[AttractorType] = None
-        self.drawer: Optional[PlotDrawer] = None
-        self.calculator: Optional[Calculator] = None
-        # Initialize attributes
-        self.initialize(input_args, show_log)
-
-    def initialize(self, input_args: Optional[tuple] = None, show_logs: bool = False):
-        # Update parameters
-        self.settings = Settings(show_logs=show_logs)
+        self.settings = Settings(show_logs=show_log)
         self.settings.update_params(input_args)
 
-        # Update chaotic model
-        self.model = self.settings.model
-
-        # Update drawer for plots
-        self.drawer = PlotDrawer(self.settings.save_plots, self.settings.show_plots, self.settings.add_2d_gif)
+        self.model: AttractorType = self.settings.model
+        self.drawer: PlotDrawer = PlotDrawer(
+            self.settings.save_plots,
+            self.settings.show_plots,
+            self.settings.add_2d_gif
+        )
         self.drawer.model_name = self.settings.attractor.capitalize()
-
-        # Update main calculator
         self.calculator = Calculator()
 
     def collect_statistics(self):
@@ -112,8 +102,8 @@ class DynamicSystem:
 
     def run(self):
         # Get vector of coordinates
-        _points = self.model.get_coordinates()
-        self.calculator.coordinates = _points
+        coordinates = self.model.get_coordinates()
+        self.calculator.coordinates = coordinates
 
         # Calculate
         stats = self.collect_statistics()
@@ -125,13 +115,17 @@ class DynamicSystem:
         correlations = self.calculator.calculate_correlation()
 
         # Draw results
-        if self.settings.show_plots or self.settings.save_plots:
-            self.drawer.coordinates = _points
-            self.drawer.show_spectrum_and_correlation(spectrums, correlations)
-            # self.drawer.show_time_plots()
-            # self.drawer.show_3d_plots()
+
+        if self.settings.show_all:
+            self.drawer.show_all_plots(coordinates, spectrums, correlations)
+        else:
+            if self.settings.show_spectrum:
+                self.drawer.show_spectrum_and_correlation(coordinates, spectrums, correlations)
+            if self.settings.show_timeplot:
+                self.drawer.show_time_plots(coordinates)
+            if self.settings.show_3d_plots:
+                self.drawer.show_3d_plots(coordinates)
             # self.drawer.make_3d_plot_gif(50)
-            # self.drawer.show_all_plots()
 
 
 if __name__ == "__main__":

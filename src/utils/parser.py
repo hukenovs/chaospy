@@ -73,6 +73,18 @@ class Settings:
     step : float
         Step for diff. equations.
 
+    show_timeplot : bool
+        Show time plots
+
+    show_spectrum : bool
+        Show spectrum plots
+
+    show_3d_plots : bool
+        Show 3D plots
+
+    show_all : bool
+        Show all plots
+
     show_plots : bool
         Show plots after calculations: True / False.
 
@@ -99,9 +111,13 @@ class Settings:
         self.init_point: Tuple[float, float, float] = (0.1, -0.1, 0.1)
         self.points: int = 1024
         self.step: float = 10
+        self.add_2d_gif: bool = False
+        self.show_all: bool = False
+        self.show_timeplot: bool = False
+        self.show_spectrum: bool = False
+        self.show_3d_plots: bool = False
         self.show_plots: bool = False
         self.save_plots: bool = False
-        self.add_2d_gif: bool = False
         self.kwargs: dict = {}
         # Model
         self._model: Optional[AttractorType] = None
@@ -124,7 +140,7 @@ class Settings:
 
     def update_params(self, input_args: Optional[Sequence[str]] = None):
         r"""Update class attributes from command line parser.
-        Kwargs is a dictionary and it can have some parameters for chaotic model.
+        Kwargs is a dictionary, and it can have some parameters for chaotic model.
 
         Parameters
         ----------
@@ -152,7 +168,7 @@ class Settings:
     def parse_arguments(
         self, input_args: Optional[Sequence[str]] = None, show_help: bool = False, show_args: bool = False
     ) -> dict:
-        """This method is an useful command line helper. You can use it with command line arguments.
+        """This method is the useful command line helper. You can use it with command line arguments.
 
         Parameters
         ----------
@@ -234,6 +250,10 @@ class Settings:
         )
         parser.add_argument("--show_plots", action="store_true", help="Show plots of a model. Default: False.")
         parser.add_argument("--save_plots", action="store_true", help="Save plots to PNG files. Default: False.")
+        parser.add_argument("--show_spectrum", action="store_true", help="Show spectrum plots")
+        parser.add_argument("--show_timeplot", action="store_true", help="Save time plots.")
+        parser.add_argument("--show_3d_plots", action="store_true", help="Save 3d plots.")
+        parser.add_argument("--show_all", action="store_true", help="Save all plots.")
         parser.add_argument(
             "--add_2d_gif", action="store_true", help="Add 2D coordinates to 3D model into GIF. Default: False."
         )

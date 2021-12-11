@@ -23,23 +23,10 @@ Main info
 | **License**         | GNU GPL 3.0.                            |
 +---------------------+-----------------------------------------+
 
-Dependencies
-~~~~~~~~~~~~
-
-Project requires:
-
-- Python (>= 3.9)
-- NumPy (>= 1.19.0)
-- SciPy (>= 1.5.1)
-- Pandas (>= 1.1.0)
-- Matplotlib (>= 3.2.2)
-- Pytest (>= 5.4.3)
-- Pre-commit (>= 2.6.0)
-
-Chaotic model (examples)
+Chaotic system
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Lorenz attractor::
+Lorenz::
 
     dx/dt = sigma * (y - x)
     dy/dt = rho * (x - z) - y
@@ -74,6 +61,36 @@ You can check the latest sources with the command::
     $ conda create -y -n venv python==3.9
     $ conda activate venv
     $ pip install -r requirements.txt
+
+Example run::
+
+    $ python run.py --show_plots --show_all lorenz
+
+
+Dependencies
+~~~~~~~~~~~~
+
+Project requires:
+
+- Python (>= 3.9)
+- NumPy (>= 1.19.0)
+- SciPy (>= 1.5.1)
+- Pandas (>= 1.1.0)
+- Matplotlib (>= 3.2.2)
+- Pytest (>= 5.4.3)
+- Pre-commit (>= 2.6.0)
+
+Chaotic models
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Lorenz
+- Rossler
+- Rikitake
+- Duffing
+- Nose Hoover
+- Lotka Volterra
+- Wang
+- Chua
 
 Help
 ~~~~
