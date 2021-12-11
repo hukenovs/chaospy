@@ -3,6 +3,16 @@
 Chaotic attractors
 ==================
 
+Lorenz attractor::
+
+    dx/dt = sigma * (y - x)
+    dy/dt = rho * (x - z) - y
+    dz/dt = x * y - beta * z
+
+where sigma = 10, rho = 28 and beta = 8/3.
+
+.. image:: https://raw.githubusercontent.com/capitanov/chaospy/master/img/Lorenz_3d.gif?sanitize=true
+
 Python scripts for some 3rd order chaotic systems (Lorenz attractor,
 Nose-Hoover oscillator, Rossler attractor, Riktake model, Duffing map etc.)
 
@@ -25,16 +35,6 @@ Main info
 
 Chaotic system
 ~~~~~~~~~~~~~~~~~~~~~~~~
-
-Lorenz::
-
-    dx/dt = sigma * (y - x)
-    dy/dt = rho * (x - z) - y
-    dz/dt = x * y - beta * z
-
-where sigma = 10, rho = 28 and beta = 8/3.
-
-.. image:: https://raw.githubusercontent.com/capitanov/chaospy/master/img/Lorenz_3d.gif?sanitize=true
 
 Rossler attractor::
 
