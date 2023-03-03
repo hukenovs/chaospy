@@ -11,7 +11,7 @@ Chaotic attractors
 Math model::
 
     dx/dt = sigma * (y - x)
-    dy/dt = rho * (x - z) - y
+    dy/dt = rho * x - y - x * z
     dz/dt = x * y - beta * z
 
 where sigma = 10, rho = 28 and beta = 8/3.
@@ -38,9 +38,9 @@ Chaotic system
 
 Rossler attractor::
 
-    dx/dt = sigma * (y - x)
-    dy/dt = rho * (x - z) - y
-    dz/dt = x * y - beta * z
+    dx/dt = -(y + z)
+    dy/dt = x + a * y
+    dz/dt = b + z * (x - c)
 
 where a = 0.2, b = 0.2 and c = 5.7.
 
@@ -87,8 +87,8 @@ Chaotic models
 - Rossler
 - Rikitake
 - Duffing
-- Nose Hoover
-- Lotka Volterra
+- Nose-Hoover
+- Lotka-Volterra
 - Wang
 - Chua
 
