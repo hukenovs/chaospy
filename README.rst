@@ -70,15 +70,7 @@ Example run::
 Dependencies
 ~~~~~~~~~~~~
 
-Project requires:
-
-- Python (>= 3.9)
-- NumPy (>= 1.19.0)
-- SciPy (>= 1.5.1)
-- Pandas (>= 1.1.0)
-- Matplotlib (>= 3.2.2)
-- Pytest (>= 5.4.3)
-- Pre-commit (>= 2.6.0)
+Project requirements: ``requirements.txt``
 
 Chaotic models
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,7 +137,7 @@ Lorenz attractor
 
     Lorenz model arguments:
       --sigma SIGMA  Lorenz system parameter. Default: 10
-      --beta BETA    Lorenz system parameter. Default: 2.6666666666666665
+      --beta BETA    Lorenz system parameter. Default: 2.6666
       --rho RHO      Lorenz system parameter. Default: 28
 
 Chua circuit
